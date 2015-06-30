@@ -1,8 +1,8 @@
-class GoGame
+class share.GoGame
 
   constructor: (size = 19) ->
-    @board = new Board(size)
-    @turn  = Cell.PIECE.BLACK
+    @board = new share.Board(size)
+    @turn  = share.Cell.PIECE.BLACK
 
   pass: ->
     @alternateTurn()
@@ -16,7 +16,7 @@ class GoGame
     @turn = !@turn
 
 
-class Board
+class share.Board
 
   constructor: (size) ->
     @size  = size
@@ -25,7 +25,7 @@ class Board
     for x in [0...@size]
       @cells.push([])
       for y in [0...@size]
-        cell = new Cell()
+        cell = new share.Cell()
         @cells[x].push(cell)
 
         if y > 0
@@ -42,7 +42,7 @@ class Board
     return @cells[x]?[y]
 
 
-class Cell
+class share.Cell
 
   @PIECE:
     EMPTY: null
@@ -50,12 +50,12 @@ class Cell
     WHITE: true
 
   constructor: ->
-    @value = Cell.PIECE.EMPTY
+    @value = share.Cell.PIECE.EMPTY
 
   play: (value) ->
 
     # if cell not empty, reject move
-    return false if not this.is(Cell.PIECE.EMPTY)
+    return false if not this.is(share.Cell.PIECE.EMPTY)
 
     @value = value
 
@@ -76,22 +76,22 @@ class Cell
 
     # if all of the surrounding friendly clusters no have no liberties, invalid
     if surroundingFriendlyClusters > 0 and surroundingFriendlyClusters == surroundingFriendlyClustersWithNoLiberties
-      @value = Cell.PIECE.EMPTY
+      @value = share.Cell.PIECE.EMPTY
       return false
 
     # if no surrounding friendly clusters to join, and this cell has no liberties, invalid
     if surroundingFriendlyClusters == 0 and thisCellLibertiesCount == 0
-      @value = Cell.PIECE.EMPTY
+      @value = share.Cell.PIECE.EMPTY
       return false
 
     # merge with any neighboring friendly clusters
-    @cluster = new Cluster(this)
+    @cluster = new share.Cluster(this)
     @mergeClusters()
 
     return this
 
   remove: ->
-    @value = Cell.PIECE.EMPTY
+    @value = share.Cell.PIECE.EMPTY
     @cluster = null
 
   is: (value) ->
@@ -111,7 +111,7 @@ class Cell
     liberties = []
 
     for cell in @surrounding()
-      liberties.push(cell) if cell.is(Cell.PIECE.EMPTY) and cell not in liberties
+      liberties.push(cell) if cell.is(share.Cell.PIECE.EMPTY) and cell not in liberties
 
     return liberties
 
@@ -119,7 +119,7 @@ class Cell
     for cell in @surrounding()
       @cluster.merge(cell.cluster) if cell.is(@value)
 
-class Cluster
+class share.Cluster
 
   constructor: (cell) ->
     @cells = [cell]

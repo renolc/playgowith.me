@@ -10,3 +10,4 @@ insecure
 coffeescript
 mquandalle:jade
 iron:router
+dburles:collection-helpers
