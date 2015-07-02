@@ -1,0 +1,28 @@
+.home {
+  .masthead {
+    background: red;
+    margin: 0;
+    padding: 0;
+
+    .container {
+      background: green;
+      height: 55vh;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      padding: 15rem 0;
+      width: auto !important;
+      max-width: 960px !important;
+      align-items: center;
+      display: flex;
+      box-align: center;
+
+      .title {
+        background: blue;
+        position: relative;
+        clear: both;
+        display: block;
+        text-align: center;
+      }
+    }
+  }
+}
