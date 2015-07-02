@@ -17,9 +17,12 @@
         font-size: 5em;
 
         .sub.header {
-          font-size: 0.4em;
           word-spacing: 0.1em;
-          margin-top: 0.5em;
+          margin-top: 1em;
+
+          .item {
+            font-size: 1.75rem;
+          }
         }
       }
 
