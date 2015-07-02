@@ -7,8 +7,6 @@
 meteor-platform
 autopublish
 insecure
-coffeescript
-mquandalle:jade
 iron:router
 dburles:collection-helpers
 semantic:ui

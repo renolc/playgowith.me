@@ -1,2 +1,0 @@
-Router.configure
-  layoutTemplate: 'application'
