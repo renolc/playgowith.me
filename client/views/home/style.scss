@@ -1,21 +1,29 @@
+body {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .home {
   .masthead {
     background-color: #697985;
-    background-image: radial-gradient(#697985, darken(#697985, 40%));
+    background-image: radial-gradient(circle farthest-side at 50vw 35vh, #697985, darken(#697985, 40%));
     margin: 0 !important;
     padding: 0;
-    height: 45vh;
-    min-height: 300px;
-    width: 100%;
+    height: 100vh;
+    width: 100vw;
     display: flex;
-    align-items: center;
     justify-content: center;
 
     .title {
+      margin-top: 25vh;
       text-align: center;
 
       .header {
         font-size: 5em;
+
+        @media only screen and (max-width: 600px) {
+          font-size: 3em;
+        }
 
         .sub.header {
           word-spacing: 0.1em;
@@ -23,18 +31,21 @@
 
           .item {
             font-size: 1.75rem;
+
+            @media only screen and (max-width: 600px) {
+              font-size: 1.1rem;
+            }
           }
         }
       }
 
       .button {
         margin-top: 1.2em;
+
+        @media only screen and (max-width: 600px) {
+          margin-top: 0.5em;
+        }
       }
     }
-  }
-
-  &> .content {
-    width: 80vw;
-    margin: 2em auto;
   }
 }
