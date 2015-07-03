@@ -1,6 +1,7 @@
 .home {
   .masthead {
-    background: #697985;
+    background-color: #697985;
+    background-image: radial-gradient(#697985, darken(#697985, 40%));
     margin: 0 !important;
     padding: 0;
     height: 45vh;
