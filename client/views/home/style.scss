@@ -44,6 +44,12 @@ body {
 
       .button {
         margin-top: 1.2em;
+        color: white;
+        background-color: #218311;
+
+        &:hover {
+          background-color: darken(#218311, 5z);
+        }
 
         @media only screen and (max-width: 600px) {
           margin-top: 0.5em;
