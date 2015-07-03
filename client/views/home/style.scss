@@ -4,9 +4,10 @@ body {
   left: 0;
 }
 .home {
+  background-image: url(/images/home/retina_wood.png);
+
   .masthead {
-    background-color: #697985;
-    background-image: radial-gradient(circle farthest-corner at 50vw 35vh, #697985, darken(#697985, 40%));
+    background-image: radial-gradient(circle farthest-corner at 50vw 35vh, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.9));
     margin: 0 !important;
     padding: 0;
     height: 100vh;
@@ -20,6 +21,7 @@ body {
 
       .header {
         font-size: 5em;
+        text-shadow: 2px 3px 15px rgba(0, 0, 0, 0.5);
 
         @media only screen and (max-width: 600px) {
           font-size: 3em;
@@ -31,6 +33,7 @@ body {
 
           .item {
             font-size: 1.75rem;
+            color: rgba(255, 255, 255, 0.9);
 
             @media only screen and (max-width: 600px) {
               font-size: 1.1rem;
@@ -41,6 +44,9 @@ body {
 
       .button {
         margin-top: 1.2em;
+        text-shadow: 2px 3px 15px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 2px 3px 15px rgba(0, 0, 0, 0.5) !important;
+        border: 3px solid rgba(255, 255, 255, 0.8);
 
         @media only screen and (max-width: 600px) {
           margin-top: 0.5em;
