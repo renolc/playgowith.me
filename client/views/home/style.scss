@@ -1,13 +1,8 @@
-body {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 .home {
   background-image: url(/images/home/retina_wood.png);
 
   .masthead {
-    background-image: radial-gradient(circle farthest-corner at 50vw 35vh, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.9));
+    background-image: radial-gradient(farthest-corner at 50vw 35vh, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8));
     margin: 0 !important;
     padding: 0;
     height: 100vh;

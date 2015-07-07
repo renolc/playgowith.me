@@ -1,6 +1,5 @@
 Template.application.helpers({
   template: function() {
-    var route = Router.current().route.getName();
-    return route ? route : 'home';
+    return Router.current().route.getName();
   }
 });
