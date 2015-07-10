@@ -1,13 +1,22 @@
 Template.play.onCreated(function() {
   this.cellSize   = 20;
   this.hoverAlpha = 0.25;
+  this.player     = this.data;
+  this.gameCursor = this.data.gameCursor();
+  this.game       = this.data.game();
 
-  this.GoGame = new GoGame();
+  var _this = this;
+  this.gameCursor.observeChanges({
+    changed: function (id, fields) {
+      _this.game = _this.data.game();
+      draw.call(_this);
+    }
+  });
 });
 
 Template.play.onRendered(function() {
-  gameCanvas.width  = this.GoGame.board.size * this.cellSize;
-  gameCanvas.height = this.GoGame.board.size * this.cellSize;
+  gameCanvas.width  = this.game.board.length * this.cellSize;
+  gameCanvas.height = this.game.board.length * this.cellSize;
 
   this.drawingContext = gameCanvas.getContext('2d');
 
@@ -37,15 +46,19 @@ Template.play.events({
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    t.GoGame.play(t.mousePosition.col, t.mousePosition.row);
-
-    draw.call(t);
+    Meteor.call('play', t.player._id, t.mousePosition);
   },
 
   'click #passButton': function (e) {
     var t = Template.instance();
 
-    t.GoGame.pass();
+    Meteor.call('pass', t.player._id);
+  }
+});
+
+Template.play.helpers({
+  isNotTurn: function () {
+    return this.game().turn !== this._id;
   }
 });
 
@@ -95,8 +108,8 @@ function loadImagesAndDraw() {
 function draw() {
 
   // draw the board itself
-  for (col = 0; col < this.GoGame.board.size; col++) {
-    for (row = 0; row < this.GoGame.board.size; row++) {
+  for (col = 0; col < this.game.board.length; col++) {
+    for (row = 0; row < this.game.board.length; row++) {
       drawCell.call(this, col, row);
     }
   }
@@ -107,11 +120,11 @@ function draw() {
 
 
 function drawHover() {
-  if (this.mousePosition){
-    if (this.GoGame.board.at(this.mousePosition.col, this.mousePosition.row).is(Cell.PIECE.EMPTY)) {
+  if (this.mousePosition && this.player._id === this.game.turn){
+    if (this.game.board[this.mousePosition.col][this.mousePosition.row] === null) {
       this.drawingContext.save();
       this.drawingContext.globalAlpha = this.hoverAlpha;
-      drawImage.call(this, getGamePieceImage.call(this, this.GoGame.turn), this.mousePosition.col, this.mousePosition.row);
+      drawImage.call(this, getGamePieceImage.call(this, this.player.isWhite), this.mousePosition.col, this.mousePosition.row);
       this.drawingContext.restore();
     }
   }
@@ -122,19 +135,19 @@ function drawCell(col, row) {
 
   if (row === 0 && col === 0)
     img = this.Images.TOPLEFT
-  else if (row === 0 && col === this.GoGame.board.size - 1)
+  else if (row === 0 && col === this.game.board.length - 1)
     img = this.Images.TOPRIGHT
-  else if (row === this.GoGame.board.size - 1 && col === 0)
+  else if (row === this.game.board.length - 1 && col === 0)
     img = this.Images.BOTTOMLEFT
-  else if (row === this.GoGame.board.size - 1 && col === this.GoGame.board.size - 1)
+  else if (row === this.game.board.length - 1 && col === this.game.board.length - 1)
     img = this.Images.BOTTOMRIGHT
   else if (row === 0)
     img = this.Images.TOP
-  else if (row === this.GoGame.board.size - 1)
+  else if (row === this.game.board.length - 1)
     img = this.Images.BOTTOM
   else if (col === 0)
     img = this.Images.LEFT
-  else if (col === this.GoGame.board.size - 1)
+  else if (col === this.game.board.length - 1)
     img = this.Images.RIGHT
   else
     img = this.Images.INTERSECTION
@@ -143,7 +156,7 @@ function drawCell(col, row) {
   drawImage.call(this, img, col, row);
 
   // if there is a piece in this cell, draw it too
-  img = getGamePieceImage.call(this, this.GoGame.board.at(col, row).value);
+  img = getGamePieceImage.call(this, this.game.board[col][row]);
   if (img)
     drawImage.call(this, img, col, row);
 }
@@ -155,10 +168,10 @@ function drawImage(img, col, row) {
 function getGamePieceImage(from) {
   var img;
   switch(from) {
-    case Cell.PIECE.BLACK:
+    case false:
       img = this.Images.BLACK;
       break;
-    case Cell.PIECE.WHITE:
+    case true:
       img = this.Images.WHITE;
   }
   return img;
