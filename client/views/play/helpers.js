@@ -56,12 +56,6 @@ Template.play.events({
   }
 });
 
-Template.play.helpers({
-  isNotTurn: function () {
-    return this.game().turn !== this._id;
-  }
-});
-
 function loadImagesAndDraw() {
   this.Images = {
     INTERSECTION: new Image(),

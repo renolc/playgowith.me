@@ -1,4 +1,5 @@
 <template name="play">
   <button id="passButton" style="display:block;" disabled={{isNotTurn}}>Pass</button>
-  <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas" style="display:block;"></canvas>
+  <input type="text" style="width:400px;" value="{{urlFor 'play' _id=opponentId}}">
 </template>
