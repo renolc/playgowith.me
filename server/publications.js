@@ -10,3 +10,10 @@ Meteor.publish('game', function(playerId) {
     ]
   });
 });
+
+Meteor.publish('cluster', function(playerId) {
+  var player = Player.findOne(playerId);
+  return Cluster.find({
+    gameId: player.gameId
+  })
+});
