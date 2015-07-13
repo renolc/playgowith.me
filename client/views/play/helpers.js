@@ -127,7 +127,8 @@ function loadImagesAndDraw() {
     LEFT:         new Image(),
     BOTTOM:       new Image(),
     BLACK:        new Image(),
-    WHITE:        new Image()
+    WHITE:        new Image(),
+    LAST:         new Image()
   };
 
   // wait for all of the images to load before drawing the board
@@ -156,6 +157,7 @@ function loadImagesAndDraw() {
   this.Images.INTERSECTION.src  = '/images/play/intersection.png';
   this.Images.BLACK.src         = '/images/play/black.png';
   this.Images.WHITE.src         = '/images/play/white.png';
+  this.Images.LAST.src          = '/images/play/last.png';
 }
 
 function draw() {
@@ -167,8 +169,17 @@ function draw() {
     }
   }
 
+  // draw the last move marker
+  drawLast.call(this);
+
   // draw the hover piece
   drawHover.call(this);
+}
+
+function drawLast() {
+  if (this.game.last) {
+    drawImage.call(this, this.Images.LAST, this.game.last[0], this.game.last[1]);
+  }
 }
 
 
