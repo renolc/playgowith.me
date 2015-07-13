@@ -1,0 +1,13 @@
+.play {
+  #gameCanvas {
+    display: block;
+    height: 80vh;
+    width: 80vh;
+    margin: 5vh auto 1em auto;
+
+    @media only screen and (orientation: portrait) {
+      height: 80vw;
+      width: 80vw;
+    }
+  }
+}

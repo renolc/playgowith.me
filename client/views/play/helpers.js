@@ -1,5 +1,5 @@
 Template.play.onCreated(function() {
-  this.cellSize   = 20;
+  this.cellDrawSize = 50;
   this.hoverAlpha = 0.25;
   this.player     = this.data;
   this.gameCursor = this.data.gameCursor();
@@ -15,8 +15,8 @@ Template.play.onCreated(function() {
 });
 
 Template.play.onRendered(function() {
-  gameCanvas.width  = this.game.board.length * this.cellSize;
-  gameCanvas.height = this.game.board.length * this.cellSize;
+  gameCanvas.width  = this.game.board.length * this.cellDrawSize;
+  gameCanvas.height = this.game.board.length * this.cellDrawSize;
 
   this.drawingContext = gameCanvas.getContext('2d');
 
@@ -26,10 +26,11 @@ Template.play.onRendered(function() {
 Template.play.events({
   'mousemove #gameCanvas': function (e) {
     var t = Template.instance();
+    var cellSize = getCellSize.call(t);
 
     t.mousePosition = {
-      col: Math.floor((e.pageX - gameCanvas.offsetLeft) / t.cellSize),
-      row: Math.floor((e.pageY - gameCanvas.offsetTop)  / t.cellSize)
+      col: Math.min(Math.max(Math.floor((e.pageX - gameCanvas.offsetLeft) / cellSize), 0), t.game.board.length),
+      row: Math.min(Math.max(Math.floor((e.pageY - gameCanvas.offsetTop)  / cellSize), 0), t.game.board.length)
     };
 
     draw.call(t);
@@ -55,6 +56,10 @@ Template.play.events({
     Meteor.call('pass', t.player._id);
   }
 });
+
+function getCellSize() {
+  return gameCanvas.offsetWidth / this.game.board.length;
+}
 
 function loadImagesAndDraw() {
   this.Images = {
@@ -156,7 +161,7 @@ function drawCell(col, row) {
 }
 
 function drawImage(img, col, row) {
-  this.drawingContext.drawImage(img, col * this.cellSize, row * this.cellSize, this.cellSize, this.cellSize);
+  this.drawingContext.drawImage(img, col * this.cellDrawSize, row * this.cellDrawSize, this.cellDrawSize, this.cellDrawSize);
 }
 
 function getGamePieceImage(from) {
