@@ -70,17 +70,21 @@ Template.play.events({
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
-      if (error) {
-        Flash.error('Error', error.error);
-      }
-    });
+    if (t.player.isTurn()) {
+      Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+        if (error) {
+          Flash.error('Error', error.error);
+        }
+      });
+    }
   },
 
   'click #passButton': function (e) {
     var t = Template.instance();
 
-    Meteor.call('pass', t.player._id);
+    if (t.player.isTurn()) {
+      Meteor.call('pass', t.player._id);
+    }
   },
 
   'click .message': function (e) {
