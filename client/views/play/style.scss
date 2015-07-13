@@ -10,4 +10,14 @@
       width: 80vw;
     }
   }
+
+  #passButton {
+    max-width: 95vw;
+    margin: 1em auto;
+  }
+
+  input {
+    max-width: 95vw;
+    margin-left: 2.5vw !important;
+  }
 }
