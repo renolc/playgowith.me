@@ -1,9 +1,9 @@
 Template.play.onCreated(function() {
   this.cellDrawSize = 50;
-  this.hoverAlpha = 0.25;
-  this.player     = this.data;
-  this.gameCursor = this.data.gameCursor();
-  this.game       = this.data.game();
+  this.hoverAlpha   = 0.25;
+  this.player       = this.data;
+  this.gameCursor   = this.data.gameCursor();
+  this.game         = this.data.game();
 
   var _this = this;
   this.gameCursor.observeChanges({
@@ -20,7 +20,30 @@ Template.play.onRendered(function() {
 
   this.drawingContext = gameCanvas.getContext('2d');
 
+  this.find('#messages')._uihooks = {
+    insertElement: function(node, next) {
+      $(node)
+        .insertBefore(next)
+        .transition('fade');
+    },
+
+    removeElement: function(node) {
+      $(node).transition({
+        animation: 'fade',
+        onComplete: function() {
+          $(node).remove();
+        }
+      })
+    }
+  };
+
   loadImagesAndDraw.call(this);
+
+  if (!this.player.isWhite && Cluster.getByGameId(this.game._id).count() === 0) {
+    Flash.info('Share this URL with your friend:', '<form class="ui form"><input class="shareUrl" value="' +
+                                                   Router.routes.play.url({ _id: this.player.opponentId() }) +
+                                                   '" readonly></form>');
+  }
 });
 
 Template.play.events({
@@ -29,8 +52,8 @@ Template.play.events({
     var cellSize = getCellSize.call(t);
 
     t.mousePosition = {
-      col: Math.min(Math.max(Math.floor((e.pageX - gameCanvas.offsetLeft) / cellSize), 0), t.game.board.length),
-      row: Math.min(Math.max(Math.floor((e.pageY - gameCanvas.offsetTop)  / cellSize), 0), t.game.board.length)
+      col: Math.min(Math.max(Math.floor((e.pageX - gameCanvas.offsetLeft) / cellSize), 0), t.game.board.length - 1),
+      row: Math.min(Math.max(Math.floor((e.pageY - gameCanvas.offsetTop)  / cellSize), 0), t.game.board.length - 1)
     };
 
     draw.call(t);
@@ -47,13 +70,40 @@ Template.play.events({
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    Meteor.call('play', t.player._id, t.mousePosition);
+    Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+      if (error) {
+        Flash.error('Error', error.error);
+      }
+    });
   },
 
   'click #passButton': function (e) {
     var t = Template.instance();
 
     Meteor.call('pass', t.player._id);
+  },
+
+  'click .message': function (e) {
+    var targetElement = $(e.target);
+    if (targetElement.prop('tagName').toLowerCase() !== 'input') {
+      messageElement = targetElement.closest('.message');
+      Flash.remove(messageElement.find('.flashId').val());
+    }
+  },
+
+  'click .shareUrl': function (e) {
+    var targetElement = $(e.target);
+    targetElement.select();
+  }
+});
+
+Template.play.helpers({
+  isMobile: function () {
+    return (typeof window.orientation !== 'undefined');
+  },
+
+  flashes: function() {
+    return Flash.find();
   }
 });
 
