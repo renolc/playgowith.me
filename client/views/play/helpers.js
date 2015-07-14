@@ -5,11 +5,26 @@ Template.play.onCreated(function() {
   this.gameCursor   = this.data.gameCursor();
   this.game         = this.data.game();
 
+  // clear any residual flashes from other tabs/former games
+  Flash.clear();
+
+  // watch the game for changes so we can make sure we have the most recent copy
   var _this = this;
   this.gameCursor.observeChanges({
     changed: function (id, fields) {
+
+      // get the latest copy of the game and draw it
       _this.game = _this.data.game();
       draw.call(_this);
+
+      // let the player know when it's their turn and if their opponent passed
+      if (fields.turn === _this.data._id) {
+        if (_this.game.last === 'pass') {
+          Flash.info("Your opponent passed. It's your turn!");
+        } else {
+          Flash.info("It's your turn!");
+        }
+      }
     }
   });
 });
@@ -20,33 +35,45 @@ Template.play.onRendered(function() {
 
   this.drawingContext = gameCanvas.getContext('2d');
 
+  // animate flash messages in and out
   this.find('#messages')._uihooks = {
     insertElement: function(node, next) {
       $(node)
+        .hide()
         .insertBefore(next)
-        .transition('fade');
+        .slideDown();
     },
 
     removeElement: function(node) {
-      $(node).transition({
-        animation: 'fade',
-        onComplete: function() {
-          $(node).remove();
-        }
-      })
+      $(node).slideUp(function() {
+        $(this).remove();
+      });
     }
   };
 
+  // load image files and start initial draw
   loadImagesAndDraw.call(this);
 
-  if (!this.player.isWhite && Cluster.getByGameId(this.game._id).count() === 0) {
-    Flash.info('Share this URL with your friend:', '<form class="ui form"><input class="shareUrl" value="' +
-                                                   Router.routes.play.url({ _id: this.player.opponentId() }) +
-                                                   '" readonly></form>');
+  // show initial flash with share link
+  if (!this.player.isWhite && !this.game.bothPlayed) {
+    Flash.info('Give this URL to your friend: <input class="shareUrl" value="' +
+               Router.routes.play.url({ _id: this.player.opponentId() }) +
+               '" readonly>');
+
+  // if the player is refreshing the page or just now returning to this games
+  // let them know if it's their turn and if their opponent passed
+  } else if (this.player.isTurn()) {
+    if (this.game.last === 'pass') {
+      Flash.info("Your opponent passed. It's your turn!");
+    } else if (this.game.bothPlayed) {
+      Flash.info("It's your turn!");
+    }
   }
 });
 
 Template.play.events({
+
+  // get the cell the mouse is hovering over
   'mousemove #gameCanvas': function (e) {
     var t = Template.instance();
     var cellSize = getCellSize.call(t);
@@ -59,6 +86,7 @@ Template.play.events({
     draw.call(t);
   },
 
+  // clear out our mose position if not hovering over the board (prevents residual hover piece from being shown)
   'mouseout #gameCanvas': function (e) {
     var t = Template.instance();
 
@@ -67,34 +95,43 @@ Template.play.events({
     draw.call(t);
   },
 
+  // if the board was clicked
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    if (t.player.isTurn()) {
+    // if it is the players turn and the clicked location is empty, simulate a play move here
+    if (t.player.isTurn() && t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
       Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+
+        // let the player know if anything went wrong
         if (error) {
-          Flash.error('Error', error.error);
+          Flash.error(error.error);
+        } else if (t.game.bothPlayed) {
+          Flash.clear();
         }
       });
     }
   },
 
+  // if the pass button was clicked
   'click #passButton': function (e) {
     var t = Template.instance();
 
+    // if it is the player's turn, simulate the pass
     if (t.player.isTurn()) {
-      Meteor.call('pass', t.player._id);
+      Meteor.call('pass', t.player._id, function(error, result) {
+
+        // let the player know if anything went wrong
+        if (error) {
+          Flash.error(error.error);
+        } else if (t.game.bothPlayed) {
+          Flash.clear();
+        }
+      });
     }
   },
 
-  'click .message': function (e) {
-    var targetElement = $(e.target);
-    if (targetElement.prop('tagName').toLowerCase() !== 'input') {
-      messageElement = targetElement.closest('.message');
-      Flash.remove(messageElement.find('.flashId').val());
-    }
-  },
-
+  // if the share url input is clicked, select the whole link for ease of copying
   'click .shareUrl': function (e) {
     var targetElement = $(e.target);
     targetElement.select();
@@ -102,19 +139,19 @@ Template.play.events({
 });
 
 Template.play.helpers({
-  isMobile: function () {
-    return (typeof window.orientation !== 'undefined');
-  },
 
+  // get all of the flash messages (local collection only)
   flashes: function() {
     return Flash.find();
   }
 });
 
+// get the size in pixels of each cell
 function getCellSize() {
   return gameCanvas.offsetWidth / this.game.board.length;
 }
 
+// load all images and draw the board
 function loadImagesAndDraw() {
   this.Images = {
     INTERSECTION: new Image(),
@@ -160,6 +197,7 @@ function loadImagesAndDraw() {
   this.Images.LAST.src          = '/images/play/last.png';
 }
 
+// draw the board in its current state
 function draw() {
 
   // draw the board itself
@@ -176,13 +214,16 @@ function draw() {
   drawHover.call(this);
 }
 
+// draw a marker indicating where the last move was made
 function drawLast() {
   if (this.game.last) {
-    drawImage.call(this, this.Images.LAST, this.game.last[0], this.game.last[1]);
+    if (Array.isArray(this.game.last)) {
+      drawImage.call(this, this.Images.LAST, this.game.last[0], this.game.last[1]);
+    }
   }
 }
 
-
+// draw a transparent piece where the mouse is currently hovering over the board
 function drawHover() {
   if (this.mousePosition && this.player._id === this.game.turn){
     if (this.game.board[this.mousePosition.col][this.mousePosition.row] === null) {
@@ -194,6 +235,7 @@ function drawHover() {
   }
 }
 
+// draw a single cell of the board
 function drawCell(col, row) {
   var img;
 
@@ -225,10 +267,12 @@ function drawCell(col, row) {
     drawImage.call(this, img, col, row);
 }
 
+// utility draw image function to simplify the rest of the draw code
 function drawImage(img, col, row) {
   this.drawingContext.drawImage(img, col * this.cellDrawSize, row * this.cellDrawSize, this.cellDrawSize, this.cellDrawSize);
 }
 
+// get the image to draw for a cell depending on the cell's current value
 function getGamePieceImage(from) {
   var img;
   switch(from) {
