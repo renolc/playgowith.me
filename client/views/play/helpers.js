@@ -229,13 +229,18 @@ function drawLast() {
 
 // draw a transparent piece where the mouse is currently hovering over the board
 function drawHover() {
-  if (this.mousePosition && this.player._id === this.game.turn){
+  if (this.mousePosition && this.player.isTurn()){
     if (this.game.board[this.mousePosition.col][this.mousePosition.row] === null) {
+      $(gameCanvas).css('cursor', 'pointer');
       this.drawingContext.save();
       this.drawingContext.globalAlpha = this.hoverAlpha;
       drawImage.call(this, getGamePieceImage.call(this, this.player.isWhite), this.mousePosition.col, this.mousePosition.row);
       this.drawingContext.restore();
+    } else {
+      $(gameCanvas).css('cursor', 'auto');
     }
+  } else {
+    $(gameCanvas).css('cursor', 'auto');
   }
 }
 
