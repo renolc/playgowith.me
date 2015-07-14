@@ -44,6 +44,10 @@
       width: 80vh;
       margin: 0 auto;
 
+      .shareUrl {
+        width: 250px;
+      }
+
       @media only screen and (orientation: portrait) {
         width: 95vw;
       }

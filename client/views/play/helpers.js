@@ -18,12 +18,14 @@ Template.play.onCreated(function() {
       draw.call(_this);
 
       // let the player know when it's their turn and if their opponent passed
-      if (fields.turn === _this.data._id) {
+      if (fields.turn === _this.player._id) {
         if (_this.game.last === 'pass') {
           Flash.info("Your opponent passed. It's your turn!");
         } else {
           Flash.info("It's your turn!");
         }
+      } else if (_this.game.bothPlayed || _this.player.isWhite) {
+        Flash.warning('Waiting for opponent to play.');
       }
     }
   });
@@ -65,9 +67,11 @@ Template.play.onRendered(function() {
   } else if (this.player.isTurn()) {
     if (this.game.last === 'pass') {
       Flash.info("Your opponent passed. It's your turn!");
-    } else if (this.game.bothPlayed) {
+    } else if (this.game.bothPlayed || this.player.isWhite) {
       Flash.info("It's your turn!");
     }
+  } else if (this.game.bothPlayed || this.player.isWhite) {
+    Flash.warning('Waiting for opponent to play.');
   }
 });
 
