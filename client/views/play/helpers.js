@@ -17,8 +17,9 @@ Template.play.onCreated(function() {
       _this.game = _this.data.game();
       draw.call(_this);
 
-      // play phase
       switch (_this.game.phase) {
+
+        // play phase
         case 'play':
 
           // let the player know when it's their turn and if their opponent passed
@@ -75,8 +76,9 @@ Template.play.onRendered(function() {
   // load image files and start initial draw
   loadImagesAndDraw.call(this);
 
-  // show initial flash with share link
   switch (this.game.phase) {
+
+    // play phase
     case 'play':
 
       // show share url if opponent hasn't played yet
@@ -209,7 +211,8 @@ function loadImagesAndDraw() {
     BOTTOM:       new Image(),
     BLACK:        new Image(),
     WHITE:        new Image(),
-    LAST:         new Image()
+    LAST:         new Image(),
+    X:            new Image()
   };
 
   // wait for all of the images to load before drawing the board
@@ -239,6 +242,7 @@ function loadImagesAndDraw() {
   this.Images.BLACK.src         = '/images/play/black.png';
   this.Images.WHITE.src         = '/images/play/white.png';
   this.Images.LAST.src          = '/images/play/last.png';
+  this.Images.X.src             = '/images/play/x.png';
 }
 
 // draw the board in its current state
