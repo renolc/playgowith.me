@@ -10,6 +10,7 @@
     display: block;
     height: 65vh;
     width: 65vh;
+    -webkit-tap-highlight-color: transparent;
 
     @media only screen and (orientation: portrait) {
       height: 80vw;
