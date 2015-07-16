@@ -255,6 +255,10 @@ function draw() {
     }
   }
 
+  Cluster.getByGame(this.game._id).forEach(function(cluster) {
+    drawCluster.call(this, cluster);
+  }, this);
+
   // draw the last move marker
   drawLast.call(this);
 
@@ -296,12 +300,16 @@ function drawHover() {
       // mark phase
       case 'mark':
 
-        // if hovering over an occupied space, show transparent x marker and pointer cursor
+        // if hovering over a cluster, show transparent x marker and pointer cursor
         if (this.game.board[this.mousePosition.col][this.mousePosition.row] !== null) {
+          var cluster = Cluster.getByCell(this.game._id, this.mousePosition);
+
           $(gameCanvas).css('cursor', 'pointer');
           this.drawingContext.save();
           this.drawingContext.globalAlpha = this.hoverAlpha;
-          drawImage.call(this, this.Images.X, this.mousePosition.col, this.mousePosition.row);
+          cluster.cells.forEach(function(cell) {
+            drawImage.call(this, this.Images.X, cell[0], cell[1]);
+          }, this);
           this.drawingContext.restore();
 
         // if hover space empty, don't draw anything and show default cursor
@@ -344,9 +352,17 @@ function drawCell(col, row) {
   drawImage.call(this, img, col, row);
 
   // if there is a piece in this cell, draw it too
-  img = getGamePieceImage.call(this, this.game.board[col][row]);
-  if (img)
-    drawImage.call(this, img, col, row);
+  // img = getGamePieceImage.call(this, this.game.board[col][row]);
+  // if (img)
+  //   drawImage.call(this, img, col, row);
+}
+
+// draw a cluster of cells
+function drawCluster(cluster) {
+  var img = getGamePieceImage.call(this, this.game.whiteId === cluster.playerId);
+  cluster.cells.forEach(function(cell) {
+    drawImage.call(this, img, cell[0], cell[1]);
+  }, this);
 }
 
 // utility draw image function to simplify the rest of the draw code
