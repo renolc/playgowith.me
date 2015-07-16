@@ -17,15 +17,34 @@ Template.play.onCreated(function() {
       _this.game = _this.data.game();
       draw.call(_this);
 
-      // let the player know when it's their turn and if their opponent passed
-      if (fields.turn === _this.player._id) {
-        if (_this.game.last === 'pass') {
-          Flash.info("Your opponent passed. It's your turn!");
-        } else {
-          Flash.info("It's your turn!");
-        }
-      } else if (_this.game.bothPlayed || _this.player.isWhite) {
-        Flash.warning('Waiting for opponent to play.');
+      // play phase
+      switch (_this.game.phase) {
+        case 'play':
+
+          // let the player know when it's their turn and if their opponent passed
+          if (_this.player.isTurn()) {
+            if (_this.game.last === 'pass') {
+              Flash.info("Your opponent passed. It's your turn!");
+            } else {
+              Flash.info("It's your turn!");
+            }
+          } else if (_this.game.bothPlayed || _this.player.isWhite) {
+            Flash.warning('Waiting for opponent to play.');
+          }
+
+          break;
+
+        // mark phase
+        case 'mark':
+
+          // let the player know if it is their turn to mark or accept the dead
+          if (_this.player.isTurn()) {
+            Flash.info('Select dead clusters and send them to your opponent for review.');
+          } else {
+            Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+          }
+
+          break;
       }
     }
   });
@@ -57,21 +76,40 @@ Template.play.onRendered(function() {
   loadImagesAndDraw.call(this);
 
   // show initial flash with share link
-  if (!this.player.isWhite && !this.game.bothPlayed) {
-    Flash.info('Give this URL to your friend: <input class="shareUrl" value="' +
-               Router.routes.play.url({ _id: this.player.opponentId() }) +
-               '" readonly>');
+  switch (this.game.phase) {
+    case 'play':
 
-  // if the player is refreshing the page or just now returning to this games
-  // let them know if it's their turn and if their opponent passed
-  } else if (this.player.isTurn()) {
-    if (this.game.last === 'pass') {
-      Flash.info("Your opponent passed. It's your turn!");
-    } else if (this.game.bothPlayed || this.player.isWhite) {
-      Flash.info("It's your turn!");
-    }
-  } else if (this.game.bothPlayed || this.player.isWhite) {
-    Flash.warning('Waiting for opponent to play.');
+      // show share url if opponent hasn't played yet
+      if (!this.player.isWhite && !this.game.bothPlayed) {
+        Flash.info('Give this URL to your friend: <input class="shareUrl" value="' +
+                   Router.routes.play.url({ _id: this.player.opponentId() }) +
+                   '" readonly>');
+
+      // if the player is refreshing the page or just now returning to this games
+      // let them know if it's their turn and if their opponent passed
+      } else if (this.player.isTurn()) {
+        if (this.game.last === 'pass') {
+          Flash.info("Your opponent passed. It's your turn!");
+        } else if (this.game.bothPlayed || this.player.isWhite) {
+          Flash.info("It's your turn!");
+        }
+      } else if (this.game.bothPlayed || this.player.isWhite) {
+        Flash.warning('Waiting for opponent to play.');
+      }
+
+      break;
+
+    // mark phase
+    case 'mark':
+
+      // let the player know if it is their turn to mark or accept the dead
+      if (this.player.isTurn()) {
+        Flash.info('Select dead clusters and send them to your opponent for review.');
+      } else {
+        Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+      }
+
+      break;
   }
 });
 
@@ -103,8 +141,10 @@ Template.play.events({
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    // if it is the players turn and the clicked location is empty, simulate a play move here
-    if (t.player.isTurn() && t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
+    // if it is play phase, the players turn, and the clicked location is empty, simulate a play move here
+    if (t.game.phase === 'play' &&
+        t.player.isTurn() &&
+        t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
       Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
 
         // let the player know if anything went wrong
@@ -121,8 +161,8 @@ Template.play.events({
   'click #passButton': function (e) {
     var t = Template.instance();
 
-    // if it is the player's turn, simulate the pass
-    if (t.player.isTurn()) {
+    // if it is the play phase and the player's turn, simulate the pass
+    if (t.game.phase === 'play' && t.player.isTurn()) {
       Meteor.call('pass', t.player._id, function(error, result) {
 
         // let the player know if anything went wrong
