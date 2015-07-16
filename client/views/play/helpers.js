@@ -1,6 +1,6 @@
 Template.play.onCreated(function() {
   this.cellDrawSize = 50;
-  this.hoverAlpha   = 0.25;
+  this.hoverAlpha   = 0.5;
   this.player       = this.data;
   this.gameCursor   = this.data.gameCursor();
   this.game         = this.data.game();
@@ -274,15 +274,44 @@ function drawLast() {
 // draw a transparent piece where the mouse is currently hovering over the board
 function drawHover() {
   if (this.mousePosition && this.player.isTurn()){
-    if (this.game.board[this.mousePosition.col][this.mousePosition.row] === null) {
-      $(gameCanvas).css('cursor', 'pointer');
-      this.drawingContext.save();
-      this.drawingContext.globalAlpha = this.hoverAlpha;
-      drawImage.call(this, getGamePieceImage.call(this, this.player.isWhite), this.mousePosition.col, this.mousePosition.row);
-      this.drawingContext.restore();
-    } else {
-      $(gameCanvas).css('cursor', 'auto');
+    switch(this.game.phase) {
+
+      // play phase
+      case 'play':
+
+        // if hovering over an empty space, show transparent play marker and pointer cursor
+        if (this.game.board[this.mousePosition.col][this.mousePosition.row] === null) {
+          $(gameCanvas).css('cursor', 'pointer');
+          this.drawingContext.save();
+          this.drawingContext.globalAlpha = this.hoverAlpha;
+          drawImage.call(this, getGamePieceImage.call(this, this.player.isWhite), this.mousePosition.col, this.mousePosition.row);
+          this.drawingContext.restore();
+
+        // if hover space taken, don't draw anything and show default cursor
+        } else {
+          $(gameCanvas).css('cursor', 'auto');
+        }
+        break;
+
+      // mark phase
+      case 'mark':
+
+        // if hovering over an occupied space, show transparent x marker and pointer cursor
+        if (this.game.board[this.mousePosition.col][this.mousePosition.row] !== null) {
+          $(gameCanvas).css('cursor', 'pointer');
+          this.drawingContext.save();
+          this.drawingContext.globalAlpha = this.hoverAlpha;
+          drawImage.call(this, this.Images.X, this.mousePosition.col, this.mousePosition.row);
+          this.drawingContext.restore();
+
+        // if hover space empty, don't draw anything and show default cursor
+        } else {
+          $(gameCanvas).css('cursor', 'auto');
+        }
+        break;
     }
+
+  // if it's not the player's turn, set default cusor
   } else {
     $(gameCanvas).css('cursor', 'auto');
   }
