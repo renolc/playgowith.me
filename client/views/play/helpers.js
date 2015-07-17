@@ -38,15 +38,32 @@ Template.play.onCreated(function() {
         // mark phase
         case 'mark':
 
-          // let the player know if it is their turn to mark or accept the dead
-          if (_this.player.isTurn()) {
-            Flash.info('Select dead clusters and send them to your opponent for review.');
+          if (_this.game.readyToApprove) {
+            if (_this.player.isTurn()) {
+              Flash.info('Approve the selection, or edit it and submit your own.');
+            } else {
+              Flash.warning('Waiting for your opponent to approve or edit your selection.');
+            }
+
           } else {
-            Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+            if (_this.player.isTurn()) {
+              Flash.info('Select dead clusters and send them to your opponent for review.');
+            } else {
+              Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+            }
           }
 
           break;
+
+        case 'fin':
+          Flash.info('Game over!<br>Black: ' + _this.game.blackScore + '<br>White: ' + _this.game.whiteScore);
+          break;
       }
+    }
+  });
+  Cluster.getByGame(this.game._id).observeChanges({
+    changed: function (id, fields) {
+      draw.call(_this);
     }
   });
 });
@@ -104,14 +121,26 @@ Template.play.onRendered(function() {
     // mark phase
     case 'mark':
 
-      // let the player know if it is their turn to mark or accept the dead
-      if (this.player.isTurn()) {
-        Flash.info('Select dead clusters and send them to your opponent for review.');
+      if (this.game.readyToApprove) {
+        if (this.player.isTurn()) {
+          Flash.info('Approve the selection, or edit it and submit your own.');
+        } else {
+          Flash.warning('Waiting for your opponent to approve or edit your selection.');
+        }
+
       } else {
-        Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+        if (this.player.isTurn()) {
+          Flash.info('Select dead clusters and send them to your opponent for review.');
+        } else {
+          Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
+        }
       }
 
       break;
+
+      case 'fin':
+        Flash.info('Game over!<br>Black: ' + this.game.blackScore + '<br>White: ' + this.game.whiteScore);
+        break;
   }
 });
 
@@ -143,37 +172,78 @@ Template.play.events({
   'click #gameCanvas': function (e) {
     var t = Template.instance();
 
-    // if it is play phase, the players turn, and the clicked location is empty, simulate a play move here
-    if (t.game.phase === 'play' &&
-        t.player.isTurn() &&
-        t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
-      Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+    // if it is the player's turn
+    if (t.player.isTurn()) {
 
-        // let the player know if anything went wrong
-        if (error) {
-          Flash.error(error.error);
-        } else if (t.game.bothPlayed) {
-          Flash.clear();
-        }
-      });
+      // if it is play phase and the clicked location is empty, simulate a play move here
+      if (t.game.phase === 'play' &&
+          t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
+        Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+
+          // let the player know if anything went wrong
+          if (error) {
+            Flash.error(error.error);
+          }
+        });
+
+      // if mark phase and position clicked contains a cluster, mark cluster as dead
+      } else if (t.game.phase === 'mark' &&
+                 t.game.board[t.mousePosition.col][t.mousePosition.row] !== null) {
+        Meteor.call('mark', t.player._id, t.mousePosition, function(error, result) {
+
+          // let player know if anything went wrong
+          if (error) {
+            Flash.error(error.error);
+          }
+        });
+      }
     }
   },
 
-  // if the pass button was clicked
-  'click #passButton': function (e) {
+  // if the action button was clicked
+  'click #actionButton': function (e) {
     var t = Template.instance();
 
-    // if it is the play phase and the player's turn, simulate the pass
-    if (t.game.phase === 'play' && t.player.isTurn()) {
-      Meteor.call('pass', t.player._id, function(error, result) {
+    // if it is the player's turn
+    if (t.player.isTurn()) {
+      switch(t.game.phase) {
 
-        // let the player know if anything went wrong
-        if (error) {
-          Flash.error(error.error);
-        } else if (t.game.bothPlayed) {
-          Flash.clear();
-        }
-      });
+        // if play phase, simulate pass
+        case 'play':
+          Meteor.call('pass', t.player._id, function(error, result) {
+
+            // let the player know if anything went wrong
+            if (error) {
+              Flash.error(error.error);
+            }
+          });
+          break;
+
+        // if mark phase
+        case 'mark':
+
+          // if not ready to approve yet, propose the selection
+          if (!t.game.readyToApprove) {
+            Meteor.call('propose', t.player._id, function(error, result) {
+
+              // let the player know if anything went wrong
+              if (error) {
+                Flash.error(error.error);
+              }
+            });
+
+          // if ready, approve selection
+          } else {
+            Meteor.call('approve', t.player._id, function(error, result) {
+
+              // let the player know if anything went wrong
+              if (error) {
+                Flash.error(error.error);
+              }
+            });
+          }
+          break;
+      }
     }
   },
 
@@ -189,6 +259,26 @@ Template.play.helpers({
   // get all of the flash messages (local collection only)
   flashes: function() {
     return Flash.find();
+  },
+
+  // get the text for the action button
+  actionButtonText: function() {
+    switch(this.game().phase) {
+      case 'play':
+        return 'Pass';
+        break;
+
+      case 'mark':
+        if (this.isTurn() && this.game().readyToApprove) {
+          return 'Approve';
+        } else {
+          return 'Submit';
+        }
+        break;
+
+      default:
+        return 'bork';
+    }
   }
 });
 
@@ -350,11 +440,6 @@ function drawCell(col, row) {
 
   // draw the board
   drawImage.call(this, img, col, row);
-
-  // if there is a piece in this cell, draw it too
-  // img = getGamePieceImage.call(this, this.game.board[col][row]);
-  // if (img)
-  //   drawImage.call(this, img, col, row);
 }
 
 // draw a cluster of cells
@@ -362,6 +447,9 @@ function drawCluster(cluster) {
   var img = getGamePieceImage.call(this, this.game.whiteId === cluster.playerId);
   cluster.cells.forEach(function(cell) {
     drawImage.call(this, img, cell[0], cell[1]);
+    if (cluster.dead) {
+      drawImage.call(this, this.Images.X, cell[0], cell[1]);
+    }
   }, this);
 }
 

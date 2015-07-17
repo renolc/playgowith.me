@@ -8,5 +8,5 @@
     {{/each}}
   </div>
   <canvas id="gameCanvas" class="{{#if isTurn}}turn{{/if}}"></canvas>
-  <button id="passButton" class="huge ui button" disabled={{isNotTurn}}>Pass</button>
+  <button id="actionButton" class="huge ui button" disabled={{isNotTurn}}>{{actionButtonText}}</button>
 </template>
