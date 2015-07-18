@@ -1,4 +1,12 @@
 <template name="play">
-  <button id="passButton" style="display:block;">Pass</button>
-  <canvas id="gameCanvas"></canvas>
+  <div id="messages">
+    {{#each flashes}}
+      <div class="ui bottom attached {{type}} message">
+        <i class="{{icon}} icon"></i> {{{message}}}
+        <input class="flashId" type="hidden" value="{{_id}}">
+      </div>
+    {{/each}}
+  </div>
+  <canvas id="gameCanvas" class="{{#if isTurn}}turn{{/if}}"></canvas>
+  <button id="actionButton" class="huge ui button" disabled={{isNotTurn}}>{{actionButtonText}}</button>
 </template>

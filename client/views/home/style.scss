@@ -1,5 +1,5 @@
 .home {
-  background-image: url(/images/home/retina_wood.png);
+  background-image: url(/images/home/retina_wood.png); /* Background pattern from subtlepatterns.com */
 
   .masthead {
     background-image: radial-gradient(farthest-corner at 50vw 35vh, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8));
@@ -32,6 +32,8 @@
 
             @media only screen and (max-width: 600px) {
               font-size: 1.1rem;
+              display: block;
+              margin-left: 0;
             }
           }
         }
