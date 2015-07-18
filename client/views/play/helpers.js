@@ -62,6 +62,9 @@ Template.play.onCreated(function() {
     }
   });
   Cluster.getByGame(this.game._id).observeChanges({
+    added: function (id, fields) {
+      draw.call(_this);
+    },
     changed: function (id, fields) {
       draw.call(_this);
     }
