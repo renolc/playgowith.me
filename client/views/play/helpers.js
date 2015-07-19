@@ -4,6 +4,7 @@ Template.play.onCreated(function() {
   this.player       = this.data;
   this.gameCursor   = this.data.gameCursor();
   this.game         = this.data.game();
+  this.readyToDraw  = false;
 
   // clear any residual flashes from other tabs/former games
   Flash.clear();
@@ -76,22 +77,6 @@ Template.play.onRendered(function() {
   gameCanvas.height = this.game.board.length * this.cellDrawSize;
 
   this.drawingContext = gameCanvas.getContext('2d');
-
-  // animate flash messages in and out
-  this.find('#messages')._uihooks = {
-    insertElement: function(node, next) {
-      $(node)
-        .hide()
-        .insertBefore(next)
-        .slideDown();
-    },
-
-    removeElement: function(node) {
-      $(node).slideUp(function() {
-        $(this).remove();
-      });
-    }
-  };
 
   // load image files and start initial draw
   loadImagesAndDraw.call(this);
@@ -259,11 +244,6 @@ Template.play.events({
 
 Template.play.helpers({
 
-  // get all of the flash messages (local collection only)
-  flashes: function() {
-    return Flash.find();
-  },
-
   // get the text for the action button
   actionButtonText: function() {
     switch(this.game().phase) {
@@ -314,12 +294,13 @@ function loadImagesAndDraw() {
   for (k in this.Images) {
     v = this.Images[k];
     imagesLoadedCount++;
-    v.onload = function() {
+    v.onload = (function(_this) {
       imagesLoadedCount--;
       if (imagesLoadedCount === 0) {
+        _this.readyToDraw = true;
         draw.call(_this);
       }
-    };
+    })(this);
   }
 
   // set the sources at the same time to kick off image loading
@@ -340,6 +321,7 @@ function loadImagesAndDraw() {
 
 // draw the board in its current state
 function draw() {
+  if (!this.readyToDraw) return;
 
   // draw the board itself
   for (col = 0; col < this.game.board.length; col++) {

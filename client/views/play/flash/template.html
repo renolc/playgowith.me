@@ -1,0 +1,10 @@
+<template name="flash">
+  <div class="messages">
+    {{#each flashes}}
+      <div class="ui bottom attached {{type}} message">
+        <i class="{{icon}} icon"></i> {{{message}}}
+        <input class="flashId" type="hidden" value="{{_id}}">
+      </div>
+    {{/each}}
+  </div>
+</template>

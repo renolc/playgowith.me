@@ -1,12 +1,5 @@
 <template name="play">
-  <div id="messages">
-    {{#each flashes}}
-      <div class="ui bottom attached {{type}} message">
-        <i class="{{icon}} icon"></i> {{{message}}}
-        <input class="flashId" type="hidden" value="{{_id}}">
-      </div>
-    {{/each}}
-  </div>
+  {{> flash}}
   <canvas id="gameCanvas" class="{{#if isTurn}}turn{{/if}}"></canvas>
   <button id="actionButton" class="huge ui button" disabled={{isNotTurn}}>{{actionButtonText}}</button>
 </template>
