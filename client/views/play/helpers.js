@@ -50,8 +50,8 @@ Template.play.events({
     var cellSize = getCellSize.call(t);
 
     t.mousePosition = {
-      col: Math.min(Math.max(Math.floor((e.pageX - gameCanvas.offsetLeft) / cellSize), 0), t.game.board.length - 1),
-      row: Math.min(Math.max(Math.floor((e.pageY - gameCanvas.offsetTop)  / cellSize), 0), t.game.board.length - 1)
+      col: Math.min(Math.max(Math.floor((e.pageX - gameCanvas.offsetLeft) / cellSize), 0), this.game().board.length - 1),
+      row: Math.min(Math.max(Math.floor((e.pageY - gameCanvas.offsetTop)  / cellSize), 0), this.game().board.length - 1)
     };
 
     draw.call(t);
@@ -71,12 +71,12 @@ Template.play.events({
     var t = Template.instance();
 
     // if it is the player's turn
-    if (t.player.isTurn()) {
+    if (this.isTurn()) {
 
       // if it is play phase and the clicked location is empty, simulate a play move here
-      if (t.game.phase === 'play' &&
-          t.game.board[t.mousePosition.col][t.mousePosition.row] === null) {
-        Meteor.call('play', t.player._id, t.mousePosition, function(error, result) {
+      if (this.game().phase === 'play' &&
+          this.game().board[t.mousePosition.col][t.mousePosition.row] === null) {
+        Meteor.call('play', this._id, t.mousePosition, function(error, result) {
 
           // let the player know if anything went wrong
           if (error) {
@@ -85,9 +85,9 @@ Template.play.events({
         });
 
       // if mark phase and position clicked contains a cluster, mark cluster as dead
-      } else if (t.game.phase === 'mark' &&
-                 t.game.board[t.mousePosition.col][t.mousePosition.row] !== null) {
-        Meteor.call('mark', t.player._id, t.mousePosition, function(error, result) {
+      } else if (this.game().phase === 'mark' &&
+                 this.game().board[t.mousePosition.col][t.mousePosition.row] !== null) {
+        Meteor.call('mark', this._id, t.mousePosition, function(error, result) {
 
           // let player know if anything went wrong
           if (error) {
@@ -155,7 +155,7 @@ function loadImagesAndDraw() {
 
 // draw the board in its current state
 function draw() {
-  if (!this.readyToDraw) return;
+  if (!this.readyToDraw || !gameCanvas) return;
 
   // draw the board itself
   for (col = 0; col < this.game.board.length; col++) {
