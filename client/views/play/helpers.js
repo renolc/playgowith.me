@@ -66,6 +66,9 @@ Template.play.onCreated(function() {
     added: function (id, fields) {
       draw.call(_this);
     },
+    removed: function(id) {
+      draw.call(_this);
+    },
     changed: function (id, fields) {
       draw.call(_this);
     }
