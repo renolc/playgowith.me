@@ -31,6 +31,14 @@ Template.flash.onRendered(function() {
   };
 });
 
+Template.flash.events({
+  // if the share url input is clicked, select the whole link for ease of copying
+  'click .shareUrl': function (e) {
+    var targetElement = $(e.target);
+    targetElement.select();
+  }
+});
+
 Template.flash.helpers({
 
   // get all of the flash messages (local collection only)

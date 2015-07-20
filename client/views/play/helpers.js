@@ -96,59 +96,6 @@ Template.play.events({
         });
       }
     }
-  },
-
-  // if the action button was clicked
-  'click #actionButton': function (e) {
-    var t = Template.instance();
-
-    // if it is the player's turn
-    if (t.player.isTurn()) {
-      switch(t.game.phase) {
-
-        // if play phase, simulate pass
-        case 'play':
-          Meteor.call('pass', t.player._id, function(error, result) {
-
-            // let the player know if anything went wrong
-            if (error) {
-              Flash.error(error.error);
-            }
-          });
-          break;
-
-        // if mark phase
-        case 'mark':
-
-          // if not ready to approve yet, propose the selection
-          if (!t.game.readyToApprove) {
-            Meteor.call('propose', t.player._id, function(error, result) {
-
-              // let the player know if anything went wrong
-              if (error) {
-                Flash.error(error.error);
-              }
-            });
-
-          // if ready, approve selection
-          } else {
-            Meteor.call('approve', t.player._id, function(error, result) {
-
-              // let the player know if anything went wrong
-              if (error) {
-                Flash.error(error.error);
-              }
-            });
-          }
-          break;
-      }
-    }
-  },
-
-  // if the share url input is clicked, select the whole link for ease of copying
-  'click .shareUrl': function (e) {
-    var targetElement = $(e.target);
-    targetElement.select();
   }
 });
 
