@@ -17,49 +17,6 @@ Template.play.onCreated(function() {
       // get the latest copy of the game and draw it
       _this.game = _this.data.game();
       draw.call(_this);
-
-      switch (_this.game.phase) {
-
-        // play phase
-        case 'play':
-
-          // let the player know when it's their turn and if their opponent passed
-          if (_this.player.isTurn()) {
-            if (_this.game.last === 'pass') {
-              Flash.info("Your opponent passed. It's your turn!");
-            } else {
-              Flash.info("It's your turn!");
-            }
-          } else if (_this.game.bothPlayed || _this.player.isWhite) {
-            Flash.warning('Waiting for opponent to play.');
-          }
-
-          break;
-
-        // mark phase
-        case 'mark':
-
-          if (_this.game.readyToApprove) {
-            if (_this.player.isTurn()) {
-              Flash.info('Approve the selection, or edit it and submit your own.');
-            } else {
-              Flash.warning('Waiting for your opponent to approve or edit your selection.');
-            }
-
-          } else {
-            if (_this.player.isTurn()) {
-              Flash.info('Select dead clusters and send them to your opponent for review.');
-            } else {
-              Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
-            }
-          }
-
-          break;
-
-        case 'fin':
-          Flash.info('Game over!<br>Black: ' + _this.game.blackScore + '<br>White: ' + _this.game.whiteScore);
-          break;
-      }
     }
   });
   Cluster.getByGame(this.game._id).observeChanges({
@@ -83,56 +40,6 @@ Template.play.onRendered(function() {
 
   // load image files and start initial draw
   loadImagesAndDraw.call(this);
-
-  switch (this.game.phase) {
-
-    // play phase
-    case 'play':
-
-      // show share url if opponent hasn't played yet
-      if (!this.player.isWhite && !this.game.bothPlayed) {
-        Flash.info('Give this URL to your friend: <input class="shareUrl" value="' +
-                   Router.routes.play.url({ _id: this.player.opponentId() }) +
-                   '" readonly>');
-
-      // if the player is refreshing the page or just now returning to this games
-      // let them know if it's their turn and if their opponent passed
-      } else if (this.player.isTurn()) {
-        if (this.game.last === 'pass') {
-          Flash.info("Your opponent passed. It's your turn!");
-        } else if (this.game.bothPlayed || this.player.isWhite) {
-          Flash.info("It's your turn!");
-        }
-      } else if (this.game.bothPlayed || this.player.isWhite) {
-        Flash.warning('Waiting for opponent to play.');
-      }
-
-      break;
-
-    // mark phase
-    case 'mark':
-
-      if (this.game.readyToApprove) {
-        if (this.player.isTurn()) {
-          Flash.info('Approve the selection, or edit it and submit your own.');
-        } else {
-          Flash.warning('Waiting for your opponent to approve or edit your selection.');
-        }
-
-      } else {
-        if (this.player.isTurn()) {
-          Flash.info('Select dead clusters and send them to your opponent for review.');
-        } else {
-          Flash.warning('Waiting for your opponent to finish selecting dead clusters.');
-        }
-      }
-
-      break;
-
-      case 'fin':
-        Flash.info('Game over!<br>Black: ' + this.game.blackScore + '<br>White: ' + this.game.whiteScore);
-        break;
-  }
 });
 
 Template.play.events({

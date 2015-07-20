@@ -8,7 +8,7 @@ Template.buttons.helpers({
         break;
 
       case 'mark':
-        if (this.player.isTurn() && this.game().readyToApprove) {
+        if (this.isTurn() && this.game().readyToApprove) {
           return 'Approve';
         } else {
           return 'Submit';
