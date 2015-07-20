@@ -1,0 +1,26 @@
+.play {
+  .messages {
+    width: 100vw;
+    position: absolute;
+    top: 0;
+
+    .message {
+      width: 80vh;
+      margin: 0 auto;
+
+      .shareUrl {
+        width: 250px;
+      }
+
+      @media only screen and (orientation: portrait) {
+        width: 95vw;
+      }
+    }
+
+    .flashId {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+  }
+}

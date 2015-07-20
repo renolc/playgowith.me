@@ -19,43 +19,4 @@
       width: 80vw;
     }
   }
-
-  #actionButton {
-    width: 10em;
-    margin: 1.5em auto 0 auto;
-    display: block;
-
-    @media only screen and (orientation: portrait) {
-      position: absolute;
-      bottom: 2.5vh;
-      width: 95vw;
-      margin-top: 0;
-      margin-left: 2.5vw;
-    }
-  }
-
-  .messages {
-    width: 100vw;
-    position: absolute;
-    top: 0;
-
-    .message {
-      width: 80vh;
-      margin: 0 auto;
-
-      .shareUrl {
-        width: 250px;
-      }
-
-      @media only screen and (orientation: portrait) {
-        width: 95vw;
-      }
-    }
-
-    .flashId {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-  }
 }
