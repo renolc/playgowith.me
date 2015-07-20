@@ -294,13 +294,13 @@ function loadImagesAndDraw() {
   for (k in this.Images) {
     v = this.Images[k];
     imagesLoadedCount++;
-    v.onload = (function(_this) {
+    v.onload = function() {
       imagesLoadedCount--;
       if (imagesLoadedCount === 0) {
         _this.readyToDraw = true;
         draw.call(_this);
-      }
-    })(this);
+      };
+    };
   }
 
   // set the sources at the same time to kick off image loading
