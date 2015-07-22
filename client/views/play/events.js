@@ -25,6 +25,7 @@ Template.play.events({
   // if the board was clicked
   'click #gameCanvas': function (e) {
     var t = Template.instance();
+    t.stopDrawingLastCaptured();
 
     // if it is the player's turn
     if (this.isTurn()) {

@@ -5,6 +5,8 @@ Template.play.onCreated(function() {
   this.gameCursor   = this.data.gameCursor();
   this.game         = this.data.game();
   this.readyToDraw  = false;
+  this.showCaptured = true;
+  this.showCapturedTimeout = null;
 
 
   /*********
@@ -84,7 +86,10 @@ Template.play.onCreated(function() {
     }, this);
 
     // draw the last move marker
-    this.drawLast();
+    this.drawLastPlayed();
+
+    // draw the last captured pieces
+    this.drawLastCaptured();
 
     // draw the hover piece
     this.drawHover();
@@ -179,12 +184,31 @@ Template.play.onCreated(function() {
   };
 
   // draw a marker indicating where the last move was made
-  this.drawLast = function() {
-    if (this.game.last) {
-      if (Array.isArray(this.game.last)) {
-        this.drawImage(this.Images.LAST, this.game.last[0], this.game.last[1]);
-      }
+  this.drawLastPlayed = function() {
+    if (this.game.last && Array.isArray(this.game.last)) {
+      this.drawImage(this.Images.LAST, this.game.last[0], this.game.last[1]);
     }
+  };
+
+  // temporarily draw the last captured clusters
+  this.drawLastCaptured = function() {
+    if (this.showCaptured) {
+      if (this.showCapturedTimeout === null) {
+        this.showCapturedTimeout = setTimeout(this.stopDrawingLastCaptured.bind(this), 2000);
+      }
+      this.game.lastCapturedClusters.forEach(function(id) {
+        var cluster = Cluster.findOne(id);
+        this.drawCluster(cluster);
+      }, this);
+    }
+  };
+
+  // stop drawing last captured
+  this.stopDrawingLastCaptured = function() {
+    clearTimeout(this.showCapturedTimeout);
+    this.showCapturedTimeout = null;
+    this.showCaptured = false;
+    this.draw();
   };
 
   // utility draw image function to simplify the rest of the draw code
@@ -205,6 +229,11 @@ Template.play.onCreated(function() {
     return img;
   };
 
+
+  /*********************
+   * Watcher Functions *
+   *********************/
+
   // watch the game for changes so we can make sure we have the most recent copy
   var _this = this;
   this.gameCursor.observeChanges({
@@ -212,17 +241,21 @@ Template.play.onCreated(function() {
 
       // get the latest copy of the game and draw it
       _this.game = _this.data.game();
+      _this.showCaptured = true;
       _this.draw();
     }
   });
   Cluster.getByGame(this.game._id).observeChanges({
     added: function (id, fields) {
+      _this.showCaptured = true;
       _this.draw();
     },
     removed: function(id) {
+      _this.showCaptured = true;
       _this.draw();
     },
     changed: function (id, fields) {
+      _this.showCaptured = true;
       _this.draw();
     }
   });
