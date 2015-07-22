@@ -1,5 +1,5 @@
 Template.play.onCreated(function() {
-  this.cellDrawSize = 50;
+  this.cellDrawSize = 100;
   this.hoverAlpha   = 0.5;
   this.player       = this.data;
   this.gameCursor   = this.data.gameCursor();
