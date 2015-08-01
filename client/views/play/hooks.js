@@ -127,7 +127,7 @@ Template.play.onCreated(function() {
     var img = this.getGamePieceImage(this.game.whiteId === cluster.playerId);
     cluster.cells.forEach(function(cell) {
       this.drawImage(img, cell[0], cell[1]);
-      if (cluster.marked) {
+      if (cluster.marked || cluster.dead) {
         this.drawImage(this.Images.X, cell[0], cell[1]);
       }
     }, this);
