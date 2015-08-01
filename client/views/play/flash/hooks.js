@@ -39,9 +39,9 @@ function updateFlash(id, fields) {
     case 'play':
 
       if (!this.player.isWhite && !this.game.bothPlayed) {
-        Flash.info('Give this URL to your friend: <input class="shareUrl" value="' +
+        Flash.info('<a href="mailto:?subject=Play%20Go%20with%20me!&body=' +
                    Router.routes.play.url({ _id: this.player.opponentId() }) +
-                   '" readonly>');
+                   '">Click here to invite your opponent <i class="mail icon link"></i></a>');
 
       // let the player know when it's their turn and if their opponent passed
       } else if (this.player.isTurn()) {
