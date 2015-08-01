@@ -39,9 +39,12 @@ function updateFlash(id, fields) {
     case 'play':
 
       if (!this.player.isWhite && !this.game.bothPlayed) {
-        Flash.info('<a href="mailto:?subject=Play%20Go%20with%20me!&body=' +
-                   Router.routes.play.url({ _id: this.player.opponentId() }) +
-                   '">Click here to invite your opponent <i class="mail icon link"></i></a>');
+        var url = Router.routes.play.url({ _id: this.player.opponentId() });
+        Flash.info(
+          'Share with your opponent: ' +
+          '<a href="mailto:?subject=Play%20Go%20with%20me!&body=' + url + '"><i class="mail icon link"></i></a><br>' +
+          '<a href="' + url + '">' + url + '</a>'
+        );
 
       // let the player know when it's their turn and if their opponent passed
       } else if (this.player.isTurn()) {
