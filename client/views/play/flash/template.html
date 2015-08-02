@@ -1,9 +1,9 @@
 <template name="flash">
   <div class="messages">
-    {{#each flashes}}
-      <div class="ui bottom attached {{type}} message">
-        <i class="{{icon}} icon"></i> {{{message}}}
+    {{#if flash}}
+      <div class="ui bottom attached {{flash.type}} message">
+        <i class="{{flash.icon}} icon"></i> {{{flash.message}}}
       </div>
-    {{/each}}
+    {{/if}}
   </div>
 </template>
