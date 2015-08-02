@@ -7,6 +7,8 @@
     .message {
       width: 80vh;
       margin: 0 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       .shareUrl {
         width: 250px;
