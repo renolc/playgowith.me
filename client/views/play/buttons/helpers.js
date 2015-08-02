@@ -16,7 +16,7 @@ Template.buttons.helpers({
         break;
 
       default:
-        return 'bork';
+        return 'Fin';
     }
   }
 });
