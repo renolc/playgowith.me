@@ -1,7 +1,7 @@
 Template.buttons.events({
 
   // if the action button was clicked
-  'click #actionButton': function () {
+  'click .main.button': function () {
 
     // if it is the player's turn
     if (this.isTurn()) {
@@ -9,13 +9,13 @@ Template.buttons.events({
 
         // if play phase, simulate pass
         case 'play':
-          Meteor.call('pass', this._id, function(error, result) {
-
-            // let the player know if anything went wrong
-            if (error) {
-              Flash.error(error.error);
-            }
-          });
+          if (confirm('Pass your turn?')) {
+            Meteor.call('pass', this._id, function(error, result) {
+              if (error) {
+                Flash.error(error.error);
+              }
+            });
+          }
           break;
 
         // if mark phase
@@ -23,26 +23,37 @@ Template.buttons.events({
 
           // if not ready to approve yet, propose the selection
           if (!this.game().readyToApprove) {
-            Meteor.call('propose', this._id, function(error, result) {
-
-              // let the player know if anything went wrong
-              if (error) {
-                Flash.error(error.error);
-              }
-            });
+            if (confirm('Propose the current selection?')) {
+              Meteor.call('propose', this._id, function(error, result) {
+                if (error) {
+                  Flash.error(error.error);
+                }
+              });
+            }
 
           // if ready, approve selection
           } else {
-            Meteor.call('approve', this._id, function(error, result) {
-
-              // let the player know if anything went wrong
-              if (error) {
-                Flash.error(error.error);
-              }
-            });
+            if (confirm('Approve the current selection?')) {
+              Meteor.call('approve', this._id, function(error, result) {
+                if (error) {
+                  Flash.error(error.error);
+                }
+              });
+            }
           }
           break;
       }
+    }
+  },
+
+  // if resign menu item clicked
+  'click .resign.item': function() {
+    if (confirm('Resign the current game?')) {
+      Meteor.call('resign', this._id, function(error, result) {
+        if (error) {
+          Flash.error(error.error);
+        }
+      });
     }
   }
 });

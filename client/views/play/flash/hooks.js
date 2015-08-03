@@ -80,7 +80,13 @@ function updateFlash(id, fields) {
       break;
 
     case 'fin':
-      Flash.info('Game over!<br>Black: ' + this.game.blackScore + '<br>White: ' + this.game.whiteScore);
+      if (this.game.resignedId === this.player._id) {
+        Flash.info('Game over!<br>You resigned.');
+      } else if (this.game.resignedId === this.player.opponentId()) {
+        Flash.info('Game over!<br>Your opponent resigned.');
+      } else {
+        Flash.info('Game over!<br>Black: ' + this.game.blackScore + '<br>White: ' + this.game.whiteScore);
+      }
       break;
   }
 }
