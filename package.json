@@ -1,0 +1,33 @@
+{
+  "name": "playgowith.me",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "engines": {
+    "node": "5.8.0"
+  },
+  "scripts": {
+    "build": "browserify ./src/main.js -o ./www/app.js",
+
+    "predeploy": "npm run build",
+    "deploy": "surge ./www"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/renolc/playgowith.me.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/renolc/playgowith.me/issues"
+  },
+  "homepage": "https://github.com/renolc/playgowith.me#readme",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "surge": "^0.17.7"
+  },
+  "dependencies": {
+    "pouchdb": "^5.3.0"
+  }
+}
