@@ -2,13 +2,13 @@
   "name": "playgowith.me",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "./www/app.js",
   "engines": {
     "node": "5.8.0"
   },
   "scripts": {
     "build": "browserify ./src/main.js -o ./www/app.js",
-
+    "watch": "watchify ./src/main.js -o ./www/app.js",
     "predeploy": "npm run build",
     "deploy": "surge ./www"
   },
@@ -25,9 +25,12 @@
   "homepage": "https://github.com/renolc/playgowith.me#readme",
   "devDependencies": {
     "browserify": "^13.0.0",
-    "surge": "^0.17.7"
+    "surge": "^0.17.7",
+    "watchify": "^3.7.0"
   },
   "dependencies": {
+    "go-sim": "^0.5.3",
+    "local-links": "^1.4.0",
     "pouchdb": "^5.3.0"
   }
 }
