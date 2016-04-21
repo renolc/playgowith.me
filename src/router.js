@@ -1,4 +1,4 @@
-/* global location, history, window */
+/* global location, history */
 
 const getLocalPathname = require('local-links').getLocalPathname
 
@@ -19,12 +19,6 @@ document.body.addEventListener('click', (e) => {
     e.preventDefault()
     router(pathname)
     return
-  }
-
-  const click = e.target.dataset.click
-  if (click) {
-    e.preventDefault()
-    console.log(JSON.parse(click))
   }
 })
 
