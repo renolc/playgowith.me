@@ -1,42 +1,26 @@
-/* global requestAnimationFrame */
-// const router = require('./router')
-const game = require('./game')
+const game = require('go-sim')()
 
-const canvas = require('./render/canvas')
-const ctx = require('./render/ctx')
-const drawCircle = require('./render/drawCircle')
-const drawBoard = require('./render/drawBoard')
-game.play(0, 0)
-game.play(0, 1)
+const canvas = require('./render')(game)
+const pass = document.getElementById('pass')
 
-drawBoard()
+game.cellSize = canvas.width / game.board.size
 
-canvas.addEventListener('mousemove', (e) => {
-  const cellSize = canvas.width / game.board.size
-  const row = Math.floor(e.offsetY / cellSize)
-  const col = Math.floor(e.offsetX / cellSize)
-
-  const cell = game.board.at(row, col)
-  if (cell.is('empty')) {
-    requestAnimationFrame(() => {
-      drawBoard()
-      ctx.save()
-      ctx.globalAlpha = 0.5
-      drawCircle(col * cellSize, row * cellSize, game.turn)
-      ctx.restore()
-    })
-  } else {
-    drawBoard()
+canvas.addEventListener('mousemove', function (e) {
+  game.mouse = {
+    x: e.offsetX,
+    y: e.offsetY
   }
 })
 
-canvas.addEventListener('mouseout', () => drawBoard())
-
-canvas.addEventListener('click', (e) => {
-  const cellSize = canvas.width / game.board.size
-  game.play(
-    Math.floor(e.offsetY / cellSize),
-    Math.floor(e.offsetX / cellSize)
-  )
-  requestAnimationFrame(drawBoard)
+canvas.addEventListener('mouseout', function () {
+  game.mouse = null
 })
+
+canvas.addEventListener('click', function (e) {
+  game.play(
+    Math.floor(e.offsetY / game.cellSize),
+    Math.floor(e.offsetX / game.cellSize)
+  )
+})
+
+pass.addEventListener('click', game.pass)
