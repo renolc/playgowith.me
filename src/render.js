@@ -4,10 +4,10 @@ const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 
 if (window.innerWidth < window.innerHeight) {
-  canvas.width = window.innerWidth * 0.95
+  canvas.width = window.innerWidth * 0.85
   canvas.height = canvas.width
 } else {
-  canvas.height = window.innerHeight * 0.90
+  canvas.height = window.innerHeight * 0.8
   canvas.width = canvas.height
 }
 
@@ -31,12 +31,17 @@ module.exports = function (game) {
         const cell = game.board.at(y, x)
         if (!cell.is('empty')) {
           drawCircle(y, x, cell.value)
+
+          // draw red mark over marked pieces
+          if (cell.marked) {
+            drawCircle(y, x, 'red', 0.5)
+          }
         }
       }
     }
 
     // draw hover piece
-    if (game.mouse) {
+    if (game.phase === 'play' && game.mouse) {
       const cell = game.board.at(
         Math.floor(game.mouse.y / game.cellSize),
         Math.floor(game.mouse.x / game.cellSize)

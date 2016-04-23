@@ -1,7 +1,6 @@
 const game = require('go-sim')()
 
 const canvas = require('./render')(game)
-const pass = document.getElementById('pass')
 
 game.cellSize = canvas.width / game.board.size
 
@@ -17,10 +16,56 @@ canvas.addEventListener('mouseout', function () {
 })
 
 canvas.addEventListener('click', function (e) {
-  game.play(
-    Math.floor(e.offsetY / game.cellSize),
-    Math.floor(e.offsetX / game.cellSize)
-  )
+  switch(game.phase) {
+    case 'play':
+      game.play(
+        Math.floor(e.offsetY / game.cellSize),
+        Math.floor(e.offsetX / game.cellSize)
+      )
+      break
+
+    case 'mark':
+      game.mark(
+        Math.floor(e.offsetY / game.cellSize),
+        Math.floor(e.offsetX / game.cellSize)
+      )
+      break
+
+    default: // nop
+  }
 })
 
-pass.addEventListener('click', game.pass)
+pass.addEventListener('click', function () {
+  game.pass()
+
+  if (game.phase === 'mark') {
+    pass.classList.add('hidden')
+    propose.classList.remove('hidden')
+  }
+})
+
+propose.addEventListener('click', function () {
+  game.propose()
+
+  propose.classList.add('hidden')
+  accept.classList.remove('hidden')
+  reject.classList.remove('hidden')
+})
+
+accept.addEventListener('click', function () {
+  game.accept()
+
+  accept.classList.add('hidden')
+  reject.classList.add('hidden')
+
+  score.classList.remove('hidden')
+  score.innerText = `Black: ${game.score.black}\nWhite: ${game.score.white}`
+})
+
+reject.addEventListener('click', function () {
+  game.reject()
+
+  accept.classList.add('hidden')
+  reject.classList.add('hidden')
+  pass.classList.remove('hidden')
+})
