@@ -32,6 +32,7 @@
   "dependencies": {
     "go-sim": "^1.2.0",
     "local-links": "^1.4.0",
-    "pouchdb": "^5.3.0"
+    "pouchdb": "^5.3.0",
+    "pouchdb-upsert": "^2.0.0"
   }
 }

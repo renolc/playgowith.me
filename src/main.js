@@ -1,10 +1,26 @@
 /* global pass, propose, accept, reject, score*/
 
+console.log()
+
+const PouchDB = require('pouchdb')
+PouchDB.plugin(require('pouchdb-upsert'))
+
+const db = new PouchDB('go')
+db.sync('https://renolc.cloudant.com/go')
+
 const game = require('go-sim')()
+db.query('find', {
+  key: window.location.pathname.slice(1),
+  include_docs: true
+})
+  .then(function (d) {
+    game.load(d.rows[0].doc.game)
+    game.cellSize = canvas.width / game.board.size
+    delete game.mouse
+    game.id = d.rows[0].id
+  })
 
 const canvas = require('./render')(game)
-
-game.cellSize = canvas.width / game.board.size
 
 canvas.addEventListener('mousemove', function (e) {
   game.mouse = {
@@ -24,6 +40,7 @@ canvas.addEventListener('click', function (e) {
         Math.floor(e.offsetY / game.cellSize),
         Math.floor(e.offsetX / game.cellSize)
       )
+      saveGame()
       break
 
     case 'mark':
@@ -31,6 +48,7 @@ canvas.addEventListener('click', function (e) {
         Math.floor(e.offsetY / game.cellSize),
         Math.floor(e.offsetX / game.cellSize)
       )
+      saveGame()
       break
 
     default: // nop
@@ -44,6 +62,7 @@ pass.addEventListener('click', function () {
     pass.classList.add('hidden')
     propose.classList.remove('hidden')
   }
+  saveGame()
 })
 
 propose.addEventListener('click', function () {
@@ -52,6 +71,7 @@ propose.addEventListener('click', function () {
   propose.classList.add('hidden')
   accept.classList.remove('hidden')
   reject.classList.remove('hidden')
+  saveGame()
 })
 
 accept.addEventListener('click', function () {
@@ -63,6 +83,7 @@ accept.addEventListener('click', function () {
   score.classList.remove('hidden')
   score.innerText = `Black: ${game.score.black}
 White: ${game.score.white}`
+  saveGame()
 })
 
 reject.addEventListener('click', function () {
@@ -71,4 +92,12 @@ reject.addEventListener('click', function () {
   accept.classList.add('hidden')
   reject.classList.add('hidden')
   pass.classList.remove('hidden')
+  saveGame()
 })
+
+function saveGame () {
+  db.upsert(game.id, function (doc) {
+    doc.game = game.serialize()
+    return doc
+  })
+}
