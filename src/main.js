@@ -1,3 +1,5 @@
+/* global pass, propose, accept, reject, score*/
+
 const game = require('go-sim')()
 
 const canvas = require('./render')(game)
@@ -16,7 +18,7 @@ canvas.addEventListener('mouseout', function () {
 })
 
 canvas.addEventListener('click', function (e) {
-  switch(game.phase) {
+  switch (game.phase) {
     case 'play':
       game.play(
         Math.floor(e.offsetY / game.cellSize),
@@ -59,7 +61,8 @@ accept.addEventListener('click', function () {
   reject.classList.add('hidden')
 
   score.classList.remove('hidden')
-  score.innerText = `Black: ${game.score.black}\nWhite: ${game.score.white}`
+  score.innerText = `Black: ${game.score.black}
+White: ${game.score.white}`
 })
 
 reject.addEventListener('click', function () {
