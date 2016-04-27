@@ -13,16 +13,19 @@ start.addEventListener('click', function () {
 
   const blackId = generateId()
   const whiteId = generateId()
+  const gameId = generateId()
 
   db.put({
-    _id: `${blackId}-${whiteId}`,
-    game: game.serialize()
+    _id: gameId,
+    game: game.serialize(),
+    blackId: blackId,
+    whiteId: whiteId
   })
     .then(function () {
       return db.sync('https://renolc.cloudant.com/go')
     })
     .then(function () {
-      window.location = blackId
+      window.location.pathname = blackId
     })
     .catch(function (d) {
       start.disabled = false

@@ -11,7 +11,7 @@ if (window.innerWidth < window.innerHeight) {
   canvas.width = canvas.height
 }
 
-module.exports = function (game) {
+module.exports = function (game, isMyTurn) {
   function render () {
     // draw board background
     ctx.beginPath()
@@ -41,7 +41,7 @@ module.exports = function (game) {
     }
 
     // draw hover piece
-    if (game.phase === 'play' && game.mouse) {
+    if (game.phase === 'play' && isMyTurn() && game.mouse) {
       const cell = game.board.at(
         Math.floor(game.mouse.y / game.cellSize),
         Math.floor(game.mouse.x / game.cellSize)
