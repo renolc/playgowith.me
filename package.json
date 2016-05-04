@@ -7,8 +7,8 @@
     "node": "5.8.0"
   },
   "scripts": {
-    "build": "browserify ./src/main.js -o ./www/app.js && browserify ./src/bootstrap.js -o ./www/bootstrap.js",
-    "watch": "parallelshell 'watchify ./src/main.js -o ./www/app.js' 'watchify ./src/bootstrap.js -o ./www/bootstrap.js'",
+    "build": "browserify ./src/index.js -o ./www/src/index.js && browserify ./src/200.js -o ./www/src/200.js",
+    "watch": "parallelshell 'watchify ./src/index.js -o ./www/src/index.js' 'watchify ./src/200.js -o ./www/src/200.js'",
     "predeploy": "npm run build",
     "deploy": "surge ./www"
   },

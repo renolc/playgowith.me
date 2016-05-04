@@ -11,7 +11,9 @@ if (window.innerWidth < window.innerHeight) {
   canvas.width = canvas.height
 }
 
-module.exports = function (game, isMyTurn) {
+module.exports = function (game) {
+  const cellSize = canvas.width / game.board.size
+
   function render () {
     // draw board background
     ctx.beginPath()
@@ -19,8 +21,8 @@ module.exports = function (game, isMyTurn) {
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     // draw grid
-    for (var x = game.cellSize / 2; x < canvas.width - game.cellSize; x += game.cellSize) {
-      for (var y = game.cellSize / 2; y < canvas.width - game.cellSize; y += game.cellSize) {
+    for (var x = cellSize / 2; x < canvas.width - cellSize; x += cellSize) {
+      for (var y = cellSize / 2; y < canvas.width - cellSize; y += cellSize) {
         drawSquare(y, x)
       }
     }
@@ -41,10 +43,10 @@ module.exports = function (game, isMyTurn) {
     }
 
     // draw hover piece
-    if (game.phase === 'play' && isMyTurn() && game.mouse) {
+    if (game.phase === 'play' && game.mouse) {
       const cell = game.board.at(
-        Math.floor(game.mouse.y / game.cellSize),
-        Math.floor(game.mouse.x / game.cellSize)
+        Math.floor(game.mouse.y / cellSize),
+        Math.floor(game.mouse.x / cellSize)
       )
 
       if (cell && cell.is('empty')) {
@@ -80,8 +82,8 @@ module.exports = function (game, isMyTurn) {
 
   function drawSquare (x, y) {
     ctx.beginPath()
-    ctx.lineWidth = (game.cellSize / 2) * 0.15
-    ctx.rect(x, y, game.cellSize, game.cellSize)
+    ctx.lineWidth = (cellSize / 2) * 0.15
+    ctx.rect(x, y, cellSize, cellSize)
     ctx.stroke()
   }
 
@@ -89,14 +91,14 @@ module.exports = function (game, isMyTurn) {
     fillColor = fillColor || 'black'
     scale = scale || 1
 
-    const halfCellSize = game.cellSize / 2
+    const halfCellSize = cellSize / 2
     const radius = halfCellSize * scale
 
     ctx.beginPath()
     ctx.fillStyle = fillColor
     ctx.ellipse(
-      (x * game.cellSize) + halfCellSize,
-      (y * game.cellSize) + halfCellSize,
+      (x * cellSize) + halfCellSize,
+      (y * cellSize) + halfCellSize,
       radius, radius,
       Math.PI, 0, 2 * Math.PI
     )
