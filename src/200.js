@@ -1,16 +1,25 @@
 const goSim = require('go-sim')
-
-const PouchDb = require('pouchdb')
-PouchDb.plugin(require('pouchdb-upsert'))
-
 const config = require('./config')
-const db = new PouchDb(config.dbName)
+const metaData = require('./metaData')
+const db = require('./db')
+
+const render = require('./render')
+const addOnClick = require('./addOnClick')
+const addOnMouseMove = require('./addOnMouseMove')
+const addOnMouseOut = require('./addOnMouseOut')
 
 const path = window.location.pathname.slice(1).split('-')
 const gameId = path[0]
-
+const playerId = path[1]
 var game = goSim()
-const canvas = require('./render')(game)
+
+metaData.gameId = gameId
+metaData.playerId = playerId
+
+render(game)
+addOnClick(game)
+addOnMouseMove(game)
+addOnMouseOut()
 
 db.sync(config.remoteUrl, {
   live: true,
@@ -24,10 +33,6 @@ db.sync(config.remoteUrl, {
 })
 
 db.get(gameId)
-  .then((doc) => {
+  .then(function (doc) {
     game.load(doc.game)
   })
-
-canvas.addEventListener('click', function () {
-  console.log('click')
-})

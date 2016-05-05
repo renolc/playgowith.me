@@ -14238,18 +14238,27 @@ exports.parse = function (str) {
 
 },{}],45:[function(require,module,exports){
 const goSim = require('go-sim')
-
-const PouchDb = require('pouchdb')
-PouchDb.plugin(require('pouchdb-upsert'))
-
 const config = require('./config')
-const db = new PouchDb(config.dbName)
+const metaData = require('./metaData')
+const db = require('./db')
+
+const render = require('./render')
+const addOnClick = require('./addOnClick')
+const addOnMouseMove = require('./addOnMouseMove')
+const addOnMouseOut = require('./addOnMouseOut')
 
 const path = window.location.pathname.slice(1).split('-')
 const gameId = path[0]
-
+const playerId = path[1]
 var game = goSim()
-const canvas = require('./render')(game)
+
+metaData.gameId = gameId
+metaData.playerId = playerId
+
+render(game)
+addOnClick(game)
+addOnMouseMove(game)
+addOnMouseOut()
 
 db.sync(config.remoteUrl, {
   live: true,
@@ -14263,25 +14272,79 @@ db.sync(config.remoteUrl, {
 })
 
 db.get(gameId)
-  .then((doc) => {
+  .then(function (doc) {
     game.load(doc.game)
   })
 
-canvas.addEventListener('click', function () {
-  console.log('click')
-})
+},{"./addOnClick":46,"./addOnMouseMove":47,"./addOnMouseOut":48,"./config":49,"./db":50,"./metaData":51,"./render":53,"go-sim":9}],46:[function(require,module,exports){
+const canvas = document.getElementById('game')
+const mouse = require('./mouse')
+const saveGame = require('./saveGame')
 
-},{"./config":46,"./render":47,"go-sim":9,"pouchdb":40,"pouchdb-upsert":26}],46:[function(require,module,exports){
+module.exports = function (game) {
+  canvas.addEventListener('click', function () {
+    game.play(mouse.row, mouse.col)
+    saveGame(game)
+  })
+}
+
+},{"./mouse":52,"./saveGame":54}],47:[function(require,module,exports){
+const canvas = document.getElementById('game')
+const mouse = require('./mouse')
+
+module.exports = function (game) {
+  canvas.addEventListener('mousemove', function (e) {
+    const cellSize = canvas.width / game.board.size
+    mouse.col = Math.floor(e.offsetX / cellSize)
+    mouse.row = Math.floor(e.offsetY / cellSize)
+  })
+}
+
+},{"./mouse":52}],48:[function(require,module,exports){
+const canvas = document.getElementById('game')
+const mouse = require('./mouse')
+
+module.exports = function () {
+  canvas.addEventListener('mouseout', function (e) {
+    mouse.col = -1
+    mouse.row = -1
+  })
+}
+
+},{"./mouse":52}],49:[function(require,module,exports){
 module.exports = {
   remoteUrl: 'https://renolc.cloudant.com/go',
   dbName: 'go'
 }
 
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
+const PouchDb = require('pouchdb')
+PouchDb.plugin(require('pouchdb-upsert'))
+const config = require('./config')
+
+module.exports = new PouchDb(config.dbName)
+
+},{"./config":49,"pouchdb":40,"pouchdb-upsert":26}],51:[function(require,module,exports){
+module.exports = {
+  gameId: null,
+  playerId: null,
+  blackId: null,
+  whiteId: null
+}
+
+},{}],52:[function(require,module,exports){
+module.exports = {
+  col: -1,
+  row: -1
+}
+
+},{}],53:[function(require,module,exports){
 /* global requestAnimationFrame */
 
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
+const mouse = require('./mouse')
+const metaData = require('./metaData')
 
 if (window.innerWidth < window.innerHeight) {
   canvas.width = window.innerWidth * 0.85
@@ -14323,10 +14386,10 @@ module.exports = function (game) {
     }
 
     // draw hover piece
-    if (game.phase === 'play' && game.mouse) {
+    if (game.phase === 'play' && mouse.col > -1) {
       const cell = game.board.at(
-        Math.floor(game.mouse.y / cellSize),
-        Math.floor(game.mouse.x / cellSize)
+        mouse.row,
+        mouse.col
       )
 
       if (cell && cell.is('empty')) {
@@ -14388,4 +14451,15 @@ module.exports = function (game) {
   return canvas
 }
 
-},{}]},{},[45]);
+},{"./metaData":51,"./mouse":52}],54:[function(require,module,exports){
+const metaData = require('./metaData')
+const db = require('./db')
+
+module.exports = function (game) {
+  db.upsert(metaData.gameId, function (doc) {
+    doc.game = game.serialize()
+    return doc
+  })
+}
+
+},{"./db":50,"./metaData":51}]},{},[45]);

@@ -2,6 +2,8 @@
 
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
+const mouse = require('./mouse')
+const metaData = require('./metaData')
 
 if (window.innerWidth < window.innerHeight) {
   canvas.width = window.innerWidth * 0.85
@@ -43,10 +45,10 @@ module.exports = function (game) {
     }
 
     // draw hover piece
-    if (game.phase === 'play' && game.mouse) {
+    if (game.phase === 'play' && mouse.col > -1) {
       const cell = game.board.at(
-        Math.floor(game.mouse.y / cellSize),
-        Math.floor(game.mouse.x / cellSize)
+        mouse.row,
+        mouse.col
       )
 
       if (cell && cell.is('empty')) {
