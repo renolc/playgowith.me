@@ -3,7 +3,7 @@
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const mouse = require('./mouse')
-const metaData = require('./metaData')
+const isMyTurn = require('./isMyTurn')
 
 if (window.innerWidth < window.innerHeight) {
   canvas.width = window.innerWidth * 0.85
@@ -14,9 +14,9 @@ if (window.innerWidth < window.innerHeight) {
 }
 
 module.exports = function (game) {
-  const cellSize = canvas.width / game.board.size
-
   function render () {
+    const cellSize = canvas.width / game.board.size
+
     // draw board background
     ctx.beginPath()
     ctx.fillStyle = '#b88a2e'
@@ -45,7 +45,7 @@ module.exports = function (game) {
     }
 
     // draw hover piece
-    if (game.phase === 'play' && mouse.col > -1) {
+    if (game.phase === 'play' && mouse.col > -1 && isMyTurn(game)) {
       const cell = game.board.at(
         mouse.row,
         mouse.col
@@ -83,6 +83,7 @@ module.exports = function (game) {
   requestAnimationFrame(render)
 
   function drawSquare (x, y) {
+    const cellSize = canvas.width / game.board.size
     ctx.beginPath()
     ctx.lineWidth = (cellSize / 2) * 0.15
     ctx.rect(x, y, cellSize, cellSize)
@@ -90,6 +91,7 @@ module.exports = function (game) {
   }
 
   function drawCircle (y, x, fillColor, scale) {
+    const cellSize = canvas.width / game.board.size
     fillColor = fillColor || 'black'
     scale = scale || 1
 
