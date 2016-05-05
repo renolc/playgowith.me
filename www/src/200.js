@@ -14237,6 +14237,8 @@ exports.parse = function (str) {
 };
 
 },{}],45:[function(require,module,exports){
+/* global opponent */
+
 const goSim = require('go-sim')
 const config = require('./config')
 const metaData = require('./metaData')
@@ -14259,17 +14261,22 @@ metaData.playerId = playerId
 render(game)
 addOnClick(game)
 addOnMouseMove(game)
-addOnMouseOut()
-addOnResize()
+addOnMouseOut(game)
+addOnResize(game)
 
 db.sync(config.remoteUrl, {
   live: true,
   retry: true,
   filter: function (doc) {
     if (doc._id === gameId) {
-      metaData.blackId = doc.blackId
-      metaData.whiteId = doc.whiteId
+      if (!metaData.blackId) {
+        metaData.blackId = doc.blackId
+        metaData.whiteId = doc.whiteId
+        metaData.opponentId = (metaData.playerId === metaData.blackId) ? metaData.whiteId : metaData.blackId
+        opponent.value = `http://${window.location.hostname}/${gameId}-${metaData.opponentId}`
+      }
       game.load(doc.game)
+      render(game)
       return true
     }
   }
@@ -14279,7 +14286,10 @@ db.get(gameId)
   .then(function (doc) {
     metaData.blackId = doc.blackId
     metaData.whiteId = doc.whiteId
+    metaData.opponentId = (metaData.playerId === metaData.blackId) ? metaData.whiteId : metaData.blackId
+    opponent.value = `http://${window.location.hostname}/${gameId}-${metaData.opponentId}`
     game.load(doc.game)
+    render(game)
   })
 
 },{"./addOnClick":46,"./addOnMouseMove":47,"./addOnMouseOut":48,"./addOnResize":49,"./config":50,"./db":51,"./metaData":53,"./render":55,"go-sim":9}],46:[function(require,module,exports){
@@ -14287,43 +14297,56 @@ const canvas = document.getElementById('game')
 const mouse = require('./mouse')
 const saveGame = require('./saveGame')
 const isMyTurn = require('./isMyTurn')
+const render = require('./render')
 
 module.exports = function (game) {
   canvas.addEventListener('click', function () {
     if (isMyTurn(game)) {
       game.play(mouse.row, mouse.col)
       saveGame(game)
+      render(game)
     }
   })
 }
 
-},{"./isMyTurn":52,"./mouse":54,"./saveGame":56}],47:[function(require,module,exports){
+},{"./isMyTurn":52,"./mouse":54,"./render":55,"./saveGame":56}],47:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const mouse = require('./mouse')
+const render = require('./render')
+const isMyTurn = require('./isMyTurn')
 
 module.exports = function (game) {
   canvas.addEventListener('mousemove', function (e) {
-    const cellSize = canvas.width / game.board.size
-    mouse.col = Math.floor(e.offsetX / cellSize)
-    mouse.row = Math.floor(e.offsetY / cellSize)
+    if (isMyTurn(game)) {
+      const cellSize = canvas.width / game.board.size
+      mouse.col = Math.floor(e.offsetX / cellSize)
+      mouse.row = Math.floor(e.offsetY / cellSize)
+      render(game)
+    }
   })
 }
 
-},{"./mouse":54}],48:[function(require,module,exports){
+},{"./isMyTurn":52,"./mouse":54,"./render":55}],48:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const mouse = require('./mouse')
+const render = require('./render')
+const isMyTurn = require('./isMyTurn')
 
-module.exports = function () {
+module.exports = function (game) {
   canvas.addEventListener('mouseout', function (e) {
-    mouse.col = -1
-    mouse.row = -1
+    if (isMyTurn(game)) {
+      mouse.col = -1
+      mouse.row = -1
+      render(game)
+    }
   })
 }
 
-},{"./mouse":54}],49:[function(require,module,exports){
+},{"./isMyTurn":52,"./mouse":54,"./render":55}],49:[function(require,module,exports){
 const canvas = document.getElementById('game')
+const render = require('./render')
 
-module.exports = function () {
+module.exports = function (game) {
   window.addEventListener('resize', function () {
     if (window.innerWidth < window.innerHeight) {
       canvas.width = window.innerWidth * 0.85
@@ -14332,10 +14355,11 @@ module.exports = function () {
       canvas.height = window.innerHeight * 0.8
       canvas.width = canvas.height
     }
+    render(game)
   })
 }
 
-},{}],50:[function(require,module,exports){
+},{"./render":55}],50:[function(require,module,exports){
 module.exports = {
   remoteUrl: 'https://renolc.cloudant.com/go',
   dbName: 'go'
@@ -14352,13 +14376,14 @@ module.exports = new PouchDb(config.dbName)
 const metaData = require('./metaData')
 
 module.exports = function (game) {
-  return metaData.playerId === metaData[game.turn + 'Id']
+  return metaData.playerId === metaData[`${game.turn}Id`]
 }
 
 },{"./metaData":53}],53:[function(require,module,exports){
 module.exports = {
   gameId: null,
   playerId: null,
+  opponentId: null,
   blackId: null,
   whiteId: null
 }
@@ -14446,9 +14471,6 @@ module.exports = function (game) {
         drawCircle(c.row, c.col, 'red', 0.5)
       })
     }
-
-    // continue rendering
-    requestAnimationFrame(render)
   }
 
   // start rendering

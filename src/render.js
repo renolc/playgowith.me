@@ -74,9 +74,6 @@ module.exports = function (game) {
         drawCircle(c.row, c.col, 'red', 0.5)
       })
     }
-
-    // continue rendering
-    requestAnimationFrame(render)
   }
 
   // start rendering

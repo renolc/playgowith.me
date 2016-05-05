@@ -1,3 +1,5 @@
+/* global opponent */
+
 const goSim = require('go-sim')
 const config = require('./config')
 const metaData = require('./metaData')
@@ -20,17 +22,22 @@ metaData.playerId = playerId
 render(game)
 addOnClick(game)
 addOnMouseMove(game)
-addOnMouseOut()
-addOnResize()
+addOnMouseOut(game)
+addOnResize(game)
 
 db.sync(config.remoteUrl, {
   live: true,
   retry: true,
   filter: function (doc) {
     if (doc._id === gameId) {
-      metaData.blackId = doc.blackId
-      metaData.whiteId = doc.whiteId
+      if (!metaData.blackId) {
+        metaData.blackId = doc.blackId
+        metaData.whiteId = doc.whiteId
+        metaData.opponentId = (metaData.playerId === metaData.blackId) ? metaData.whiteId : metaData.blackId
+        opponent.value = `http://${window.location.hostname}/${gameId}-${metaData.opponentId}`
+      }
       game.load(doc.game)
+      render(game)
       return true
     }
   }
@@ -40,5 +47,8 @@ db.get(gameId)
   .then(function (doc) {
     metaData.blackId = doc.blackId
     metaData.whiteId = doc.whiteId
+    metaData.opponentId = (metaData.playerId === metaData.blackId) ? metaData.whiteId : metaData.blackId
+    opponent.value = `http://${window.location.hostname}/${gameId}-${metaData.opponentId}`
     game.load(doc.game)
+    render(game)
   })

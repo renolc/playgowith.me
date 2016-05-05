@@ -25,3 +25,9 @@
   font-size: 20px;
   text-align: center;
 }
+
+#opponent {
+  display: block;
+  width: 80%;
+  margin: 5px auto;
+}
