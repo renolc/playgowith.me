@@ -38,7 +38,7 @@ module.exports = function (game) {
         reject.classList.remove('hidden')
 
         propose.disabled = propose.disabled || (!metaData.newMarks && game.previousPlay.type === 'propose')
-        accept.disabled = accept.disabled || (game.previousPlay.type !== 'propose')
+        accept.disabled = accept.disabled || !propose.disabled
         reject.disabled = accept.disabled
         break
 
