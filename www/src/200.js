@@ -14243,12 +14243,15 @@ const goSim = require('go-sim')
 const config = require('./config')
 const metaData = require('./metaData')
 const db = require('./db')
+const isMyTurn = require('./isMyTurn')
 
 const render = require('./render')
 const addOnClick = require('./addOnClick')
 const addOnMouseMove = require('./addOnMouseMove')
 const addOnMouseOut = require('./addOnMouseOut')
 const addOnResize = require('./addOnResize')
+
+const addOnButtonClick = require('./addOnButtonClick')
 
 const path = window.location.pathname.slice(1).split('-')
 const gameId = path[0]
@@ -14263,6 +14266,7 @@ addOnClick(game)
 addOnMouseMove(game)
 addOnMouseOut(game)
 addOnResize(game)
+addOnButtonClick(game)
 
 db.sync(config.remoteUrl, {
   live: true,
@@ -14274,6 +14278,9 @@ db.sync(config.remoteUrl, {
         metaData.whiteId = doc.whiteId
         metaData.opponentId = (metaData.playerId === metaData.blackId) ? metaData.whiteId : metaData.blackId
         opponent.value = `http://${window.location.hostname}/${gameId}-${metaData.opponentId}`
+      }
+      if (isMyTurn(game)) {
+        metaData.newMarks = false
       }
       game.load(doc.game)
       render(game)
@@ -14292,24 +14299,72 @@ db.get(gameId)
     render(game)
   })
 
-},{"./addOnClick":46,"./addOnMouseMove":47,"./addOnMouseOut":48,"./addOnResize":49,"./config":50,"./db":51,"./metaData":53,"./render":55,"go-sim":9}],46:[function(require,module,exports){
+},{"./addOnButtonClick":46,"./addOnClick":47,"./addOnMouseMove":48,"./addOnMouseOut":49,"./addOnResize":50,"./config":51,"./db":52,"./isMyTurn":53,"./metaData":54,"./render":56,"go-sim":9}],46:[function(require,module,exports){
+/* global pass, propose, reject, accept */
+
+const isMyTurn = require('./isMyTurn')
+const saveGame = require('./saveGame')
+
+module.exports = function (game) {
+  pass.addEventListener('click', function () {
+    if (isMyTurn(game)) {
+      game.pass()
+      saveGame(game)
+    }
+  })
+
+  propose.addEventListener('click', function () {
+    if (isMyTurn(game)) {
+      game.propose()
+      game.previousPlay.type = 'propose'
+      saveGame(game)
+    }
+  })
+
+  reject.addEventListener('click', function () {
+    if (isMyTurn(game)) {
+      game.reject()
+      game.previousPlay.type = 'reject'
+      saveGame(game)
+    }
+  })
+
+  accept.addEventListener('click', function () {
+    if (isMyTurn(game)) {
+      game.accept()
+      saveGame(game)
+    }
+  })
+}
+
+},{"./isMyTurn":53,"./saveGame":57}],47:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const mouse = require('./mouse')
 const saveGame = require('./saveGame')
 const isMyTurn = require('./isMyTurn')
 const render = require('./render')
+const metaData = require('./metaData')
 
 module.exports = function (game) {
   canvas.addEventListener('click', function () {
     if (isMyTurn(game)) {
-      game.play(mouse.row, mouse.col)
-      saveGame(game)
+      switch (game.phase) {
+        case 'play':
+          game.play(mouse.row, mouse.col)
+          saveGame(game)
+          break
+
+        case 'mark':
+          game.mark(mouse.row, mouse.col)
+          metaData.newMarks = true
+          break
+      }
       render(game)
     }
   })
 }
 
-},{"./isMyTurn":52,"./mouse":54,"./render":55,"./saveGame":56}],47:[function(require,module,exports){
+},{"./isMyTurn":53,"./metaData":54,"./mouse":55,"./render":56,"./saveGame":57}],48:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const mouse = require('./mouse')
 const render = require('./render')
@@ -14326,7 +14381,7 @@ module.exports = function (game) {
   })
 }
 
-},{"./isMyTurn":52,"./mouse":54,"./render":55}],48:[function(require,module,exports){
+},{"./isMyTurn":53,"./mouse":55,"./render":56}],49:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const mouse = require('./mouse')
 const render = require('./render')
@@ -14342,7 +14397,7 @@ module.exports = function (game) {
   })
 }
 
-},{"./isMyTurn":52,"./mouse":54,"./render":55}],49:[function(require,module,exports){
+},{"./isMyTurn":53,"./mouse":55,"./render":56}],50:[function(require,module,exports){
 const canvas = document.getElementById('game')
 const render = require('./render')
 
@@ -14352,67 +14407,102 @@ module.exports = function (game) {
       canvas.width = window.innerWidth * 0.85
       canvas.height = canvas.width
     } else {
-      canvas.height = window.innerHeight * 0.8
+      canvas.height = window.innerHeight * 0.75
       canvas.width = canvas.height
     }
     render(game)
   })
 }
 
-},{"./render":55}],50:[function(require,module,exports){
+},{"./render":56}],51:[function(require,module,exports){
 module.exports = {
   remoteUrl: 'https://renolc.cloudant.com/go',
   dbName: 'go'
 }
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 const PouchDb = require('pouchdb')
 PouchDb.plugin(require('pouchdb-upsert'))
 const config = require('./config')
 
 module.exports = new PouchDb(config.dbName)
 
-},{"./config":50,"pouchdb":40,"pouchdb-upsert":26}],52:[function(require,module,exports){
+},{"./config":51,"pouchdb":40,"pouchdb-upsert":26}],53:[function(require,module,exports){
 const metaData = require('./metaData')
 
 module.exports = function (game) {
   return metaData.playerId === metaData[`${game.turn}Id`]
 }
 
-},{"./metaData":53}],53:[function(require,module,exports){
+},{"./metaData":54}],54:[function(require,module,exports){
 module.exports = {
   gameId: null,
   playerId: null,
   opponentId: null,
   blackId: null,
-  whiteId: null
+  whiteId: null,
+  newMarks: false
 }
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 module.exports = {
   col: -1,
   row: -1
 }
 
-},{}],55:[function(require,module,exports){
-/* global requestAnimationFrame */
+},{}],56:[function(require,module,exports){
+/* global requestAnimationFrame, pass, propose, accept, reject, score */
 
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const mouse = require('./mouse')
 const isMyTurn = require('./isMyTurn')
+const metaData = require('./metaData')
 
 if (window.innerWidth < window.innerHeight) {
   canvas.width = window.innerWidth * 0.85
   canvas.height = canvas.width
 } else {
-  canvas.height = window.innerHeight * 0.8
+  canvas.height = window.innerHeight * 0.75
   canvas.width = canvas.height
 }
 
 module.exports = function (game) {
   function render () {
     const cellSize = canvas.width / game.board.size
+
+    pass.disabled = !isMyTurn(game)
+    propose.disabled = pass.disabled
+    accept.disabled = pass.disabled
+    reject.disabled = pass.disabled
+
+    switch (game.phase) {
+      case 'play':
+        pass.classList.remove('hidden')
+        propose.classList.add('hidden')
+        accept.classList.add('hidden')
+        reject.classList.add('hidden')
+        break
+
+      case 'mark':
+        pass.classList.add('hidden')
+        propose.classList.remove('hidden')
+        accept.classList.remove('hidden')
+        reject.classList.remove('hidden')
+
+        propose.disabled = propose.disabled || (!metaData.newMarks && game.previousPlay.type === 'propose')
+        accept.disabled = accept.disabled || (game.previousPlay.type !== 'propose')
+        reject.disabled = accept.disabled
+        break
+
+      case 'end':
+        pass.classList.add('hidden')
+        propose.classList.add('hidden')
+        accept.classList.add('hidden')
+        reject.classList.add('hidden')
+        score.innerText = JSON.stringify(game.score)
+        score.classList.remove('hidden')
+    }
 
     // draw board background
     ctx.beginPath()
@@ -14506,7 +14596,7 @@ module.exports = function (game) {
   return canvas
 }
 
-},{"./isMyTurn":52,"./mouse":54}],56:[function(require,module,exports){
+},{"./isMyTurn":53,"./metaData":54,"./mouse":55}],57:[function(require,module,exports){
 const metaData = require('./metaData')
 const db = require('./db')
 
@@ -14517,4 +14607,4 @@ module.exports = function (game) {
   })
 }
 
-},{"./db":51,"./metaData":53}]},{},[45]);
+},{"./db":52,"./metaData":54}]},{},[45]);

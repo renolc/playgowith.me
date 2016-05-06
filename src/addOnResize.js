@@ -7,7 +7,7 @@ module.exports = function (game) {
       canvas.width = window.innerWidth * 0.85
       canvas.height = canvas.width
     } else {
-      canvas.height = window.innerHeight * 0.8
+      canvas.height = window.innerHeight * 0.75
       canvas.width = canvas.height
     }
     render(game)

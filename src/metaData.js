@@ -3,5 +3,6 @@ module.exports = {
   playerId: null,
   opponentId: null,
   blackId: null,
-  whiteId: null
+  whiteId: null,
+  newMarks: false
 }

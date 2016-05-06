@@ -1,21 +1,55 @@
-/* global requestAnimationFrame */
+/* global requestAnimationFrame, pass, propose, accept, reject, score */
 
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
 const mouse = require('./mouse')
 const isMyTurn = require('./isMyTurn')
+const metaData = require('./metaData')
 
 if (window.innerWidth < window.innerHeight) {
   canvas.width = window.innerWidth * 0.85
   canvas.height = canvas.width
 } else {
-  canvas.height = window.innerHeight * 0.8
+  canvas.height = window.innerHeight * 0.75
   canvas.width = canvas.height
 }
 
 module.exports = function (game) {
   function render () {
     const cellSize = canvas.width / game.board.size
+
+    pass.disabled = !isMyTurn(game)
+    propose.disabled = pass.disabled
+    accept.disabled = pass.disabled
+    reject.disabled = pass.disabled
+
+    switch (game.phase) {
+      case 'play':
+        pass.classList.remove('hidden')
+        propose.classList.add('hidden')
+        accept.classList.add('hidden')
+        reject.classList.add('hidden')
+        break
+
+      case 'mark':
+        pass.classList.add('hidden')
+        propose.classList.remove('hidden')
+        accept.classList.remove('hidden')
+        reject.classList.remove('hidden')
+
+        propose.disabled = propose.disabled || (!metaData.newMarks && game.previousPlay.type === 'propose')
+        accept.disabled = accept.disabled || (game.previousPlay.type !== 'propose')
+        reject.disabled = accept.disabled
+        break
+
+      case 'end':
+        pass.classList.add('hidden')
+        propose.classList.add('hidden')
+        accept.classList.add('hidden')
+        reject.classList.add('hidden')
+        score.innerText = JSON.stringify(game.score)
+        score.classList.remove('hidden')
+    }
 
     // draw board background
     ctx.beginPath()
