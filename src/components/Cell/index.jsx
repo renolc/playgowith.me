@@ -7,6 +7,7 @@ export default class extends Component {
     super(props)
 
     this.state = {
+      piece: false,
       hover: false
     }
     
@@ -27,10 +28,13 @@ export default class extends Component {
       <div
         className="cell"
         onMouseEnter={_ => this.setState({ hover: true })}
-        onMouseLeave={_ => this.setState({ hover: false })}>
+        onMouseLeave={_ => this.setState({ hover: false })}
+        onClick={_ => this.setState({ piece: true })}>
 
         <svg><use xlinkHref={this.cellType}></use></svg>
-        {this.state.hover && <svg className="hover"><use xlinkHref='#white'></use></svg>}
+        {this.state.piece
+          ? <svg className="piece"><use xlinkHref='#white'></use></svg>
+          : this.state.hover && <svg className="piece hover"><use xlinkHref='#white'></use></svg>}
       </div>
     )
   }
