@@ -5,6 +5,10 @@ import './style.css'
 export default class extends Component {
   constructor(props) {
     super(props)
+
+    this.state = {
+      hover: false
+    }
     
     const { x, y, size } = props
     this.cellType = (x === 0 && y === 0 && '#top-left') ||
@@ -18,23 +22,15 @@ export default class extends Component {
                     '#inner'
   }
 
-  onMouseEnter() {
-    this.div.classList.add('red')
-  }
-
-  onMouseLeave() {
-    this.div.classList.remove('red')
-  }
-
   render() {
     return (
       <div
         className="cell"
-        ref={(el) => this.div = el}
-        onMouseEnter={this.onMouseEnter.bind(this)}
-        onMouseLeave={this.onMouseLeave.bind(this)}>
+        onMouseEnter={_ => this.setState({ hover: true })}
+        onMouseLeave={_ => this.setState({ hover: false })}>
 
         <svg><use xlinkHref={this.cellType}></use></svg>
+        {this.state.hover && <svg className="hover"><use xlinkHref='#white'></use></svg>}
       </div>
     )
   }

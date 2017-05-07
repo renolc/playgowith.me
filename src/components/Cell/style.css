@@ -4,6 +4,7 @@
   width: 30px;
   height: 30px;
   cursor: pointer;
+  position: relative;
 }
 
 .red {
@@ -18,4 +19,12 @@ svg {
 
 .row {
   height: 30px;
+}
+
+.hover {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0.5;
 }

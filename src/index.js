@@ -6,6 +6,6 @@ import App from './components/App'
 import './index.css'
 
 ReactDOM.render(
-  <App size={5} />,
+  <App size={9} />,
   document.getElementById('root')
 )
